@@ -34,7 +34,7 @@
 	   else {std::cout << "file not open:" << m_filename << std::endl; }
 	}
 
-	bool pixdb::read_all(std::vector <STRU_PIXDB_REC> &v_rec)
+	bool pixdb::load_file(std::vector <STRU_PIXDB_REC> &v_rec)
 	{
 		 ifile.open(m_filename,ios_base::binary);
 	 if (ifile.is_open())

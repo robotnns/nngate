@@ -120,6 +120,7 @@ public:
   	size_t get_rows() const {return rows;}
   	size_t get_cols() const {return cols;}
 	Vectord get_col(size_t index = 0);
+	void set_col(const Vectord& v, size_t index);
 
     void print();
 

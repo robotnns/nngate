@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 #include "pixdb.h"
-#define DATA_FOLDER "../data/"
+#define DATA_FOLDER "../../data/"
 
 	sf::Font font;
 

@@ -1,6 +1,12 @@
+#linux 
+*.o
+*.so
+sf_viewer
+extract_idat
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+
 
 # Folder config file
 Desktop.ini

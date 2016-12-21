@@ -42,6 +42,15 @@ struct STRU_PIXDB_REC
 	//int recnum;     //Zlib header 0x78 0x01
 	char label;
 	char  pix_buf[IMG_SIZE];
+	
+};
+
+struct STRU_PIXDB_REC_DOUBLE
+{
+
+	//int recnum;     //Zlib header 0x78 0x01
+	double label;
+	std::vector <double>pix_buf ;
 };
 
 
@@ -50,11 +59,28 @@ class pixdb
 	public :
 	void set_file_name(std::string filename);
 	void open(char * filename);
-    int read_count();	
+    int read_count();
 	void write_db_entry(char * pix_buf,char label);
-	bool read_all(std::vector <STRU_PIXDB_REC> &v_rec);
-
+	inline bool read_all(std::vector <STRU_PIXDB_REC> &v_rec)
+	{return load_file(v_rec);}
+	bool read_all(std::vector <STRU_PIXDB_REC_DOUBLE> &v_rec)
+	{
+		
+        std::vector <STRU_PIXDB_REC> v_rec_char;
+		load_file(v_rec_char);
+		for(auto rec : v_rec_char )
+		{
+			struct STRU_PIXDB_REC_DOUBLE rec_double;
+			rec_double.label =rec.label;			 
+			for(int i = 0 ; i <IMG_SIZE ; i++ )
+				rec_double.pix_buf.push_back(rec.pix_buf[i]);
+				
+			v_rec.push_back(rec_double)	;
+		}	
+		return true;
+	}
 	private :
+	bool load_file(std::vector <STRU_PIXDB_REC> &v_rec);
 
 	ifstream ifile;
 	ofstream ofile;

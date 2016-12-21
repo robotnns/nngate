@@ -2,20 +2,64 @@
 #include "SparseAutoencoder.h"
 #include "Softmax.h"
 #include <iostream>
+#include <pixdb.h>
 #include "dlib/optimization/optimization.h"
 
 using namespace std;
 int main(int argc, char **argv) {
-
-    size_t input_size = 4;
-    size_t hidden_size = 2;
+	
+	std::vector <STRU_PIXDB_REC_DOUBLE> v_image_in;	
+	pixdb pdb;
+	pdb.open(argv[1]);	
+	pdb.read_all(v_image_in);
+	
+	std::vector <STRU_PIXDB_REC_DOUBLE> v_image_in2;	
+	pixdb pdb2;
+	pdb2.open(argv[2]);	
+	pdb2.read_all(v_image_in2);
+	
+	size_t nb_image = v_image_in.size();
+	size_t nb_image2 = v_image_in.size();
+	
+    size_t input_size = 28*28;
+    size_t hidden_size = 196;
     double rho = 0.1;
     double lambda = 0.003;
     double beta = 3;
-    size_t m = 2;
-	size_t num_labels = 2;
+    size_t m1 = nb_image / 2;
+	size_t m2 = nb_image2 / 2;
+	size_t m = m1 + m2;
+	//size_t num_labels = 2;
 
-    Matrix2d data(input_size,m,1);
+	Matrix2d data(input_size,m,1);
+	for (size_t i = 0; i < m1; i++)
+	{
+		data.set_col(v_image_in[i].pix_buf, i);
+	}
+	for (size_t i = 0; i < m2; i++)
+	{
+		data.set_col(v_image_in2[i].pix_buf, m1 + i);
+	}
+    SparseAutoencoder ae(input_size, hidden_size, rho, lambda, beta, m,data);
+    CnnVector theta = ae.initialize();
+	cout<<"initial theta ="<<endl;
+    //theta.print();
+    
+    size_t len = theta.get_length();
+    column_vector x_theta(len);
+    for(size_t i = 0; i < len; ++i)
+    {
+        x_theta(i) = theta(i);
+    }
+
+	double opt_cost;
+    opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(10), dlib::objective_delta_stop_strategy(), ae, 
+							  dlib::derivative([&](column_vector& x){return ae.compute_grad(x);}), x_theta, 0.528);
+
+	cout<<"opt cost ="<<endl;
+    std::cout<<opt_cost <<std::endl;
+	
+    /*Matrix2d data(input_size,m,1);
 	data(1,0) = 2; data(1,1) = 2; 
 	data(3,1) = 2; data(3,2) = 2;
     SparseAutoencoder ae(input_size, hidden_size, rho, lambda, beta, m,data);
@@ -25,15 +69,15 @@ int main(int argc, char **argv) {
     
     //ae.forward_backward(theta, data);
 
-    /*
-    Matrix2d a2 = ae.sparse_autoencoder(theta, hidden_size, input_size, data);
-    std::cout<<"a2 = "<<std::endl;
-    a2.print();
+    
+    //Matrix2d a2 = ae.sparse_autoencoder(theta, hidden_size, input_size, data);
+    //std::cout<<"a2 = "<<std::endl;
+    //a2.print();
 
-    CnnVector grad = ae.get_grad();
-    theta = theta + 0.0001*grad;
-    ae.forward_backward(theta, data);
-    */
+    //CnnVector grad = ae.get_grad();
+    //theta = theta + 0.0001*grad;
+    //ae.forward_backward(theta, data);
+    
     size_t len = theta.get_length();
     column_vector x_theta(len);
     for(size_t i = 0; i < len; ++i)
@@ -86,5 +130,6 @@ int main(int argc, char **argv) {
 	
 	CnnVector opt_theta_sm = column_vector_to_cnn_vector(x_theta_sm);
 	CnnVector predictions = sm.softmax_predict(opt_theta_sm, test_features);
+	*/
 	return 0;
 }
