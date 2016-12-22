@@ -14,6 +14,7 @@ namespace nng
     
     void print_v(const Vectord& v);
     double rand_a_b(double a, double b);
+	size_t rand_a_b(size_t a, size_t b);
     double normal_distribution_rand(double mean, double stddev); // generate random number with standard normal distribution
     double sigmoid(const double x);
     double sigmoid_prime(const double x);

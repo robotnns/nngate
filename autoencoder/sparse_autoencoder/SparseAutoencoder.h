@@ -28,6 +28,7 @@ namespace nng{
             nng::Vector do_compute_grad(nng::Vector& theta);// back proparagion compute gradient
             
             nng::Vector get_grad(){return grad;}
+			nng::Matrix2d getW1(nng::Vector& theta);
             
 
         private:

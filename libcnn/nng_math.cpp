@@ -20,6 +20,11 @@ double nng::rand_a_b(double a, double b)
     return (( rand()/(double)RAND_MAX ) * (b-a) + a);
 }
 
+size_t nng::rand_a_b(size_t a, size_t b)
+{
+    return (( rand()/(size_t)RAND_MAX ) * (b-a) + a);
+}
+
 double nng::normal_distribution_rand(double mean, double stddev)
 {
     std::default_random_engine generator;

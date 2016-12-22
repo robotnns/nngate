@@ -507,6 +507,15 @@ void Matrix2d::set_col(const Vectord& v, size_t index)
 	}
 }
 
+void Matrix2d::set_col(const nng::Vector& v, size_t index)
+{
+	assert (v.get_length() == rows);
+    for (size_t i=0; i<rows; ++i)
+	{
+		mat[i][index] = v[i];
+	}
+}
+
 // Matrix/scalar addition
 Matrix2d Matrix2d::operator+(const double& rhs) 
 {

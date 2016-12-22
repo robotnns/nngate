@@ -66,6 +66,7 @@ namespace nng{
         size_t get_cols() const {return cols;}
         Vectord get_col(size_t index = 0);
         void set_col(const Vectord& v, size_t index);
+		void set_col(const nng::Vector& v, size_t index);
 
         void print();
 

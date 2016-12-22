@@ -31,8 +31,8 @@ nng::Vector nng::SparseAutoencoder::initialize()
     {
         for(size_t  j = 0 ; j < visible_size ; j ++ )
         {
-          W1(i,j) = rand_a_b(0,1);
-          W2(j,i) = rand_a_b(0,1);
+          W1(i,j) = rand_a_b(0.0,1.0);
+          W2(j,i) = rand_a_b(0.0,1.0);
         }
     }
     W1 = W1 * 2 * r - r;
@@ -56,7 +56,11 @@ nng::Vector nng::SparseAutoencoder::initialize()
 
 }
 
-
+nng::Matrix2d nng::SparseAutoencoder::getW1(nng::Vector& theta)
+{
+	nng::Matrix2d W1(hidden_size,visible_size,theta.getSegment(0,hidden_size*visible_size));
+	return W1;
+}
 
 double nng::SparseAutoencoder::operator() (nng::column_vector x) const {  return compute_cost(x); } 
 
