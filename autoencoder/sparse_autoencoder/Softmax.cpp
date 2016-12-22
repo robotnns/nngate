@@ -1,7 +1,8 @@
 #include "Softmax.h"
 #include "dlib/optimization/optimization.h"
 
-Softmax::Softmax(size_t num_classes, size_t input_size, double lambda, Matrix2d& data,  CnnVector& labels):
+
+nng::Softmax::Softmax(size_t num_classes, size_t input_size, double lambda, nng::Matrix2d& data,  nng::Vector& labels):
 	num_classes(num_classes)
 	,input_size(input_size)
 	,lambda(lambda)
@@ -10,26 +11,26 @@ Softmax::Softmax(size_t num_classes, size_t input_size, double lambda, Matrix2d&
 {
 }
 
-Softmax::~Softmax()
+nng::Softmax::~Softmax()
 {
 }
 
-CnnVector Softmax::initialize()
+nng::Vector nng::Softmax::initialize()
 {
     //theta = 0.005 * np.random.randn(num_classes * input_size)
-    CnnVector theta(num_classes * input_size, 0.0);
+    nng::Vector theta(num_classes * input_size, 0.0);
     for(size_t  i = 0 ; i < num_classes * input_size ; i ++ )
     {
-          theta(i) = 0.005 * util::normal_distribution_rand(0.0,1.0);
+          theta(i) = 0.005 * nng::normal_distribution_rand(0.0,1.0);
     }
     return theta;
 }
 
-double Softmax::operator() (column_vector x) const {  return compute_softmax_cost(x); } 
+double nng::Softmax::operator() (column_vector x) const {  return compute_softmax_cost(x); } 
 
-double Softmax::compute_softmax_cost(column_vector& x) const
+double nng::Softmax::compute_softmax_cost(column_vector& x) const
 {
-    CnnVector v = column_vector_to_cnn_vector(x);
+    nng::Vector v = column_vector_to_cnn_vector(x);
     return softmax_cost(v).first;
 }
 
@@ -41,17 +42,17 @@ param lambda_: weight decay parameter
 param data: the N x M input matrix, where each column corresponds a single test set
 param labels: an M x 1 matrix containing the labels for the input data
 */
-double_vector Softmax::softmax_cost(CnnVector& theta) const
+double_vector nng::Softmax::softmax_cost(nng::Vector& theta) const
 {
     size_t m = data.get_cols();// data is output of hidden layer, dim data: input_size*m
-    Matrix2d m_theta(num_classes, input_size, theta); // y = theta*x, dim theta: num_classes*input_size
-    Matrix2d theta_data = m_theta * data; // dim theta_data: num_classes*m
+    nng::Matrix2d m_theta(num_classes, input_size, theta); // y = theta*x, dim theta: num_classes*input_size
+    nng::Matrix2d theta_data = m_theta * data; // dim theta_data: num_classes*m
     theta_data = theta_data - theta_data.max(); 
-	Matrix2d theta_data_exp = theta_data.exp();
-    Matrix2d prob_data = theta_data_exp / theta_data_exp.sum(0);
+	nng::Matrix2d theta_data_exp = theta_data.exp();
+    nng::Matrix2d prob_data = theta_data_exp / theta_data_exp.sum(0);
     //indicator = scipy.sparse.csr_matrix((np.ones(m), (labels, np.array(range(m)))))
 	//indicator = np.array(indicator.todense())
-	Matrix2d indicator(num_classes, m, 0.0); // dim indicator: num_classes*m
+	nng::Matrix2d indicator(num_classes, m, 0.0); // dim indicator: num_classes*m
 	for (size_t i = 0; i < m; ++i)
 	{
 		indicator(labels(i), i) = 1; // the class of the i-th example is labels(i)
@@ -59,8 +60,8 @@ double_vector Softmax::softmax_cost(CnnVector& theta) const
 	//cost = (-1 / m) * np.sum(indicator * np.log(prob_data)) + (lambda_ / 2) * np.sum(theta * theta)
     double cost =  (-1 / m) *( (indicator.dot(prob_data)).sum() ) + 0.5 * lambda * (theta.dot(theta)).sum();
     //grad = (-1 / m) * (indicator - prob_data).dot(data.transpose()) + lambda_ * theta
-	Matrix2d diff_indicator_prob = indicator - prob_data;
-    Matrix2d grad = (-1 / m) * diff_indicator_prob * (data.transpose()) + lambda * m_theta; // dim grad: num_classes*input_size
+	nng::Matrix2d diff_indicator_prob = indicator - prob_data;
+    nng::Matrix2d grad = (-1 / m) * diff_indicator_prob * (data.transpose()) + lambda * m_theta; // dim grad: num_classes*input_size
     //return cost, grad.flatten()		
     double_vector result = std::make_pair(cost,grad.to_cnnvector());
     return result;
@@ -68,14 +69,14 @@ double_vector Softmax::softmax_cost(CnnVector& theta) const
 }
 
 /* data - the N x M input matrix, where each column data(:, i) corresponds to a single test set*/
-CnnVector Softmax::softmax_predict(CnnVector& opt_theta, Matrix2d& data)
+nng::Vector nng::Softmax::softmax_predict(nng::Vector& opt_theta, nng::Matrix2d& data)
 {
 
-    Matrix2d m_opt_theta(num_classes, input_size, opt_theta);// dim m_opt_theta: num_classes * input_size
+    nng::Matrix2d m_opt_theta(num_classes, input_size, opt_theta);// dim m_opt_theta: num_classes * input_size
 
-    Matrix2d prod = m_opt_theta * data; // dim data: input_size * m, dim prod: num_classes * m
-    Matrix2d pred = prod.exp() / prod.exp().sum(0); //dim pred: num_classes * m
-    CnnVector prediction = pred.argmax(0); // dim prediction: m
+    nng::Matrix2d prod = m_opt_theta * data; // dim data: input_size * m, dim prod: num_classes * m
+    nng::Matrix2d pred = prod.exp() / prod.exp().sum(0); //dim pred: num_classes * m
+    nng::Vector prediction = pred.argmax(0); // dim prediction: m
 
 	return prediction;
 }
@@ -95,13 +96,13 @@ options.maxIter: number of iterations to train for
 */
 
 /*
-CnnVector Softmax::softmax_train(size_t input_size, size_t num_classes, double lambda, Matrix2d& data, CnnVector& labels)
+nng::Vector Softmax::softmax_train(size_t input_size, size_t num_classes, double lambda, nng::Matrix2d& data, nng::Vector& labels)
 {
     //theta = 0.005 * np.random.randn(num_classes * input_size)
-    CnnVector theta(num_classes * input_size, 0.0);
+    nng::Vector theta(num_classes * input_size, 0.0);
     for(size_t  i = 0 ; i < num_classes * input_size ; i ++ )
     {
-          theta(i) = 0.005 * util::normal_distribution_rand(0.0,1.0);
+          theta(i) = 0.005 * nng::normal_distribution_rand(0.0,1.0);
     }
 	
     size_t len = theta.get_length();

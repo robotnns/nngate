@@ -1,5 +1,5 @@
 TARGET = libcnn.so
-OBJS =database.o pixdb.o ts_log.o config_parser.o filter_init_db.o cnn_util.o
+OBJS =database.o pixdb.o ts_log.o config_parser.o filter_init_db.o Vector.o Matrix2d.o nng_math.o
 INCLUDE_DIR = -I. -I../dlib-master
 
 CC = g++ -g -std=c++0x $(INCLUDE_DIR)
