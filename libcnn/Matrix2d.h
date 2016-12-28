@@ -22,7 +22,8 @@ namespace nng{
         Matrix2d& operator=(const Matrix2d& rhs);
         Matrix2d operator+(const Matrix2d& rhs);
         Matrix2d& operator+=(const Matrix2d& rhs);
-        Matrix2d operator-(const Matrix2d& rhs);
+        Matrix2d operator-(Matrix2d& rhs);
+		Matrix2d operator-(const Matrix2d& rhs) const;
         Matrix2d& operator-=(const Matrix2d& rhs);
         Matrix2d operator*(const Matrix2d& rhs);
         Matrix2d& operator*=(const Matrix2d& rhs);
@@ -43,6 +44,7 @@ namespace nng{
         Matrix2d sigmoid_prime();
         double max();
         Matrix2d exp();
+		Matrix2d log();
         nng::Vector argmax(size_t axis);
 
         // Matrix/scalar operations

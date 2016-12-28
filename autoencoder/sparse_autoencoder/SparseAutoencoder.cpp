@@ -82,8 +82,9 @@ double nng::SparseAutoencoder::do_compute_cost(nng::Vector& theta) const
     double b1 = theta(2 * hidden_size * visible_size);
     double b2 = theta(2 * hidden_size * visible_size + hidden_size);
 
+	
     size_t m = data.get_cols(); // nb training examples
-
+ 
     // Forward propagation
      nng::Matrix2d z2 = W1*data + b1; // dim of z2: hidden_size*m
      nng::Matrix2d a2 = z2.sigmoid(); // dim of a2: hidden_size*m
@@ -100,6 +101,7 @@ double nng::SparseAutoencoder::do_compute_cost(nng::Vector& theta) const
     // double cost = (h - data).power(2).sum() / (2 * m)
                   // + (lambda / 2) * (W1.power(2).sum() + W2.power(2).sum())
                   // + beta * rho.kl_divergence(rho_hat).sum();
+
     double cost = (h - data).power(2).sum() / (2 * m)
           + (lambda / 2) * (W1.power(2).sum() + W2.power(2).sum())
           + beta * vect_rho.kl_divergence(vect_rho_hat).sum();

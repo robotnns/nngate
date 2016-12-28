@@ -127,7 +127,27 @@ Matrix2d& Matrix2d::operator+=(const Matrix2d& rhs)
 
 
 // Subtraction of this matrix and another
-Matrix2d Matrix2d::operator-(const Matrix2d& rhs) 
+Matrix2d Matrix2d::operator-(Matrix2d& rhs) 
+{
+  // check dimension
+  size_t rhs_rows = rhs.get_rows();
+  size_t rhs_cols = rhs.get_cols();
+  assert (rows == rhs_rows && cols == rhs_cols);
+
+  Matrix2d result(rows, cols, 0.0);
+
+  for (size_t i=0; i<rows; ++i) 
+  {
+    for (size_t j=0; j<cols; ++j) 
+	{
+      result(i,j) = mat[i][j] - rhs(i,j);
+    }
+  }
+
+  return result;
+}
+
+Matrix2d Matrix2d::operator-(const Matrix2d& rhs) const
 {
   // check dimension
   size_t rhs_rows = rhs.get_rows();
@@ -451,7 +471,20 @@ Matrix2d Matrix2d::exp()
   {
     for (size_t j=0; j<cols; ++j) 
 	{
-      result(i,j) = std::exp(mat[i][j]);
+      result(i,j) = std::exp((long double)mat[i][j]);
+    }
+  }
+  return result;
+}
+
+Matrix2d Matrix2d::log()
+{
+  Matrix2d result(rows, cols, 0.0);
+  for (size_t i=0; i<rows; ++i) 
+  {
+    for (size_t j=0; j<cols; ++j) 
+	{
+      result(i,j) = std::log((long double)mat[i][j]);
     }
   }
   return result;

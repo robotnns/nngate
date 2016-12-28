@@ -16,7 +16,8 @@ namespace nng{
             nng::Vector initialize();
             double operator() (column_vector x) const;
             double compute_softmax_cost(column_vector& x) const;
-            double_vector softmax_cost(nng::Vector& theta) const;
+           // double_vector softmax_cost(nng::Vector& theta) const;
+			double softmax_cost(nng::Vector& theta) const;
             nng::Vector softmax_predict(nng::Vector& opt_theta, nng::Matrix2d& data);
             //nng::Vector softmax_train(size_t input_size, size_t num_classes, double lambda, nng::Matrix2d& data, nng::Vector& labels);
         private:
