@@ -225,11 +225,10 @@ Vector Vector::kl_divergence(Vector& v)
 {
     assert (length == v.get_length());
     Vector result(*this);
-    double sum_vec = sum();
-    double sum_v = v.sum();
-
+    //double sum_vec = sum();
+    //double sum_v = v.sum();
     for (size_t i=0; i<length; ++i) {
-        result(i) = nng::kl_divergence(vec[i]/sum_vec, v(i)/sum_v);
+        result(i) = nng::kl_divergence(vec[i], v(i));
     }
     return result;
 }

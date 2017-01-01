@@ -1,5 +1,5 @@
 TARGET =main_sparseAE
-OBJS =SparseAutoencoder.o Softmax.o main_sparseAE.o
+OBJS =SparseAutoencoder.o SparseAutoencoderGrad.o Softmax.o SoftmaxGrad.o main_sparseAE.o
 INCLUDE_DIR = -I. -I../../libcnn -I../../dlib-master/
 
 CC = g++ -g -std=c++0x 
