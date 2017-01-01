@@ -36,7 +36,8 @@ window.draw(text);
 
 void show_index(sf::RenderWindow &window,int cur_index , int total_size)
 {
-	std::string info = "";
+	
+std::string info = "";
 	info =std::to_string(cur_index) +"/" +std::to_string(total_size);
 	 draw_text(info,window,0,150,14);
 
@@ -59,7 +60,7 @@ void draw_pixel( sf::RenderWindow &window,float x , float y,char color)
 void draw_image(sf::RenderWindow &window,std::vector <STRU_PIXDB_REC> &v_rec,int index)
 {
 
-	for (int y=0 ; y<IMG_WIDTH_HEIGHT-1  ; y++)
+ 	for (int y=0 ; y<IMG_WIDTH_HEIGHT-1  ; y++)
 		{
 		for (int x=0 ; x<IMG_WIDTH_HEIGHT ; x++)
 		 {
@@ -70,18 +71,8 @@ void draw_image(sf::RenderWindow &window,std::vector <STRU_PIXDB_REC> &v_rec,int
 		}
 
 }
-void draw_pixel2( float x , float y ,sf::Image & image,char color)
-{
 
 
-	if(color==0)
-
-	image.setPixel(0, 0,sf::Color(255, 255, 255));
-    else
-	image.setPixel(0, 0,sf::Color(0, 0, 255));
-
-
-}
 void draw_image2(sf::RenderWindow &window,std::vector <STRU_PIXDB_REC> &v_rec,int index)
 {
 
@@ -111,6 +102,38 @@ sprite.setTexture(texture, true);
 
 
 }
+
+void draw_image_lib(sf::RenderWindow &window,std::vector <STRU_PIXDB_REC> &v_rec,int width , int height ,int index)
+{
+
+    sf::Image        image;
+	image.create(width, height, sf::Color::Black );
+    sf::Sprite       sprite;
+    sf::Texture texture;
+    sf::Uint8        *pixels  = new sf::Uint8[IMG_SIZE* 4];
+
+
+       for (int y=0 ; y<width-1  ; y++)
+		{
+		for (int x=0 ; x<height ; x++)
+		 {
+			   char color =v_rec.at(index).pix_buf[width*y+x];
+		   if(color==0)
+			   image.setPixel (x,  y, sf::Color(255, 255, 255));
+                else
+                image.setPixel ( x,  y, sf::Color(0, 0, 255));
+
+            }
+        }
+
+texture.loadFromImage(image);
+sprite.setTexture(texture, true);
+        window.draw(sprite);
+
+
+}
+
+
 
 void show_fps(sf::RenderWindow &window,sf::Clock &clock, float &lastTime)
 {
@@ -177,7 +200,7 @@ if (!font.loadFromFile(DATA_FOLDER "Roboto-Black.ttf"))
 		show_fps(window,clock,lastTime);
 
 
-		  draw_image2(window,v_rec,image_index);
+		  draw_image_lib(window,v_rec,IMG_WIDTH_HEIGHT,IMG_WIDTH_HEIGHT,image_index);
         window.display();
     }
 
