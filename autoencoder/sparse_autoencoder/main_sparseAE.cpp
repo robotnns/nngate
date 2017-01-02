@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	
 	//nng::Vector opt_theta = autoencoder_compute_theta(ae,ae_grad, patch_size);
 	
-	nng::Vector opt_theta = read_opt_theta_from_file("opt_theta.txt");
+	nng::Vector opt_theta = read_opt_theta_from_file("opt_theta.dat");
 	
 	size_t m_train_1 = nb_image /4;
 	size_t m_train_2 = nb_image /4;

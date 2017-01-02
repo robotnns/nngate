@@ -43,8 +43,11 @@ namespace nng{
         Matrix2d power(const double exponent);
         Matrix2d sigmoid_prime();
         double max();
+		double min();
         Matrix2d exp();
 		Matrix2d log();
+		Matrix2d abs();
+		Matrix2d floor();
         nng::Vector argmax(size_t axis);
 
         // Matrix/scalar operations
@@ -67,6 +70,7 @@ namespace nng{
         size_t get_rows() const {return rows;}
         size_t get_cols() const {return cols;}
         Vectord get_col(size_t index = 0);
+		Vectord get_row(size_t index = 0) {return mat[index];}
         void set_col(const Vectord& v, size_t index);
 		void set_col(const nng::Vector& v, size_t index);
 
