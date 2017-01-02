@@ -464,6 +464,14 @@ double Matrix2d::max()
 	return max;
 }
 
+// min element
+double Matrix2d::min()
+{
+	Vectord v = toVector();
+	double min = *std::min_element(v.begin(), v.end());
+	return min;
+}
+
 Matrix2d Matrix2d::exp()
 {
   Matrix2d result(*this);
@@ -489,6 +497,32 @@ Matrix2d Matrix2d::log()
   }
   return result;
 }
+
+Matrix2d Matrix2d::abs()
+{
+  Matrix2d result(rows, cols, 0.0);
+  for (size_t i=0; i<rows; ++i) 
+  {
+    for (size_t j=0; j<cols; ++j) 
+	{
+      result(i,j) = std::abs((long double)mat[i][j]);
+    }
+  }
+  return result;
+} 
+
+Matrix2d Matrix2d::floor()
+{
+  Matrix2d result(rows, cols, 0.0);
+  for (size_t i=0; i<rows; ++i) 
+  {
+    for (size_t j=0; j<cols; ++j) 
+	{
+      result(i,j) = std::floor((long double)mat[i][j]);
+    }
+  }
+  return result;
+} 
 
 nng::Vector Matrix2d::argmax(size_t axis)
 {
