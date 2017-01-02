@@ -128,6 +128,7 @@ void draw_image_lib(sf::RenderWindow &window,std::vector <STRU_PIXDB_REC> &v_rec
 
 texture.loadFromImage(image);
 sprite.setTexture(texture, true);
+sprite.setPosition(10,10);
         window.draw(sprite);
 
 
