@@ -7,17 +7,20 @@
 class image_vec 
 {
 	public:
-	image_vec(const int &height,const int &widths ,double &threshold, std::vector<double> *pix_vec)
+	image_vec(const int &height,const int &widths ,double &threshold,float &posx,float &posy, std::vector<double> *pix_vec)
 	{
 		_height = height;
 		_widths = widths;
 		_threshold=threshold;
 		_pix_vec=pix_vec;
+		_posx=posx;
+		_posy=posy;
 	}
 	int _height;
 	int _widths;
 	float _posx=0;
 	float _posy=0;
+	
 	double _threshold;
 	std::vector<double> *_pix_vec;
 };
@@ -25,9 +28,9 @@ class PixelMatrixViewer
 {
 	    
 		public :
-		void add_vec(const int &&height,const int &&widths ,double &&threshold,std::vector<double> *pix_vec)
+		void add_vec(const int &&height,const int &&widths ,double &&threshold,float &&posx,float &&posy,std::vector<double> *pix_vec)
 		{
-			auto iv =  image_vec(height,widths,threshold,pix_vec);
+			auto iv =  image_vec(height,widths,threshold,posx,posy,pix_vec);
 			v_im.push_back(iv);
 		}
 		void clear_vec()
@@ -59,12 +62,14 @@ void draw_image_lib(int index)
 		for (int x=0 ; x<v_im.at(index)._height ; x++)
 		 {
 			std::cout << "x:"<< x << "y:" << y << std::endl;
-			   auto color  =v_im.at(index)._pix_vec->at(v_im.at(index)._widths*y+x);
+			   double color  =v_im.at(index)._pix_vec->at(v_im.at(index)._widths*y+x);
 		   /*if(color>v_im.at(index)._threshold)
 			   image.setPixel (x,  y, sf::Color(255, 255, 255));
                 else
                 image.setPixel ( x,  y, sf::Color(0, 0, 255));*/
-					image.setPixel (x,y,grayToRgb(color));
+					//image.setPixel (x,y,grayToRgb((unsigned char)color));
+				//std::cout << "COLOR = > " << 	color << std::endl;				
+				image.setPixel (x,y,grayToRgb(color));
             }
 			
 			
@@ -72,7 +77,7 @@ void draw_image_lib(int index)
 
 texture.loadFromImage(image);
 sprite.setTexture(texture, true);
-//sprite.setPosition(posx,posy);
+sprite.setPosition(v_im.at(index)._posx,v_im.at(index)._posy);
         window.draw(sprite);
 
 
@@ -81,7 +86,7 @@ sprite.setTexture(texture, true);
 sf::Color grayToRgb(double val)
 {
 	unsigned char ramapedVal = remapValue(val ,-1.0,1.0,0,255);
-	return grayToRgb(val);
+	return grayToRgb(ramapedVal);
 	
 }
 
@@ -96,7 +101,7 @@ sf::Color grayToRgb(unsigned char Color )
 
 float remapValue(double inputVal ,double minIn,double maxIn,double outMin,double outMax)
 {
-	float output = 0.0;
+	
      return  (inputVal - minIn) * (outMax - outMin) / (maxIn - minIn) + outMin ;
 }
 void render()
@@ -104,7 +109,8 @@ void render()
 	
 	      
 	  window.clear();
-	  draw_image_lib(0);
+	  for (int i = 0 ; i <  v_im.size() ;i++ )
+	 	 draw_image_lib(i);
       window.display();
 	 
 }
