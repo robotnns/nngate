@@ -24,10 +24,12 @@ int main()
 	std::cout <<"f:" <<fcolor << "c:" <<(unsigned int)color<< std::endl;
 	exit(0);*/
 	
-	pxv.init(800,600);
+	pxv.init(200,200);
 	pxv.add_vec(20,20,10.0,10.0,&pix_vec,2.0);
 	pxv.add_vec(20,20,50.0,50.0,&pix_vec);
 	pxv.render();	
+	pxv.save_image(0);
+	pxv.save_image(1);
 	sleep(4);
 	
 }
