@@ -28,7 +28,7 @@ class image_vec
 				_vec_min=e;
 			
 		}	
-		std::cout <<"min:" << _vec_min <<"max:"<<_vec_max<<std::endl;
+		//std::cout <<"min:" << _vec_min <<"max:"<<_vec_max<<std::endl;
 		create_image();
 	}
 	bool save(std::string name  )
@@ -50,7 +50,7 @@ void create_image()
 		for (int x=0 ; x<_height ; x++)
 		 {		
 			   double color  =_pix_vec->at(_widths*y+x);
-				std::cout << "color:" << color <<std::endl;
+				//std::cout << "color:" << color <<std::endl;
 				if(_rgb_color)
 				_image.setPixel (x,y,grayToRgb(color,_vec_min,_vec_max));
 				else
@@ -125,7 +125,7 @@ class PixelMatrixViewer
 		public :
 		void add_vec(const int &&height,const int &&widths ,float &&posx,float &&posy,std::vector<double> *pix_vec,float scale=1.0)
 		{
-			auto iv =  image_vec(height,widths,posx,posy,pix_vec,scale);
+			auto iv =  image_vec(height,widths,posx,posy,pix_vec,scale,_rgb_color);
 			v_im.push_back(iv);
 		}
 		void clear_vec()
@@ -167,7 +167,7 @@ void render()
 	
 	      
 	  window.clear();
-	  for (int i = 0 ; i <  v_im.size() ;i++ )
+	  for (unsigned int i = 0 ; i <  v_im.size() ;i++ )
 	 	  draw_image(i);
       window.display();
 	 

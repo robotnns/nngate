@@ -1,6 +1,9 @@
 #linux 
 *.o
 *.so
+test
+*.png
+*.jpg
 sf_viewer
 extract_idat
 main_sparseAE

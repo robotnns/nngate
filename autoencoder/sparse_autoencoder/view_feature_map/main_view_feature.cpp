@@ -1,6 +1,11 @@
 #include "nng_math.h"
 #include <iostream>
 #include <fstream>
+#include "pixel_matrix_viewer.h"
+#include <unistd.h>
+#include <stdio.h>      /* printf, scanf, puts, NULL */
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 struct FeatureMapData
 {
@@ -42,12 +47,24 @@ int main(int argc, char **argv)
 	feature_map = feature_map * 255;
 	feature_map = feature_map.floor();
 	
-
-	//std::vector<double> data = feature_map.get_row(0);
-	//std::vector<int> image_data(data.begin(), data.end());
-	//nng::print_v(feature_map.get_row(0));
-	for (size_t i = 0; i < image_numbers; i++)
-		draw(feature_map.get_row(i), width, height);
+	PixelMatrixViewer pxv;
+    std::vector<double> data;
+	pxv.init(1000,1000,false);
+	size_t n_row = std::sqrt(image_numbers);
+	size_t n_col = std::sqrt(image_numbers);
+	float scale = 2.0;
+	for (size_t i = 0; i < n_row; i++)
+	{
+		for (size_t j = 0; j < n_col; j++)
+		{
+			data = feature_map.get_row(i*n_col + j);
+			pxv.add_vec(height,width,width*j*scale,height*i*scale,&data,scale);
+		}
+	}
+	
+	pxv.render();	
+	pxv.save_image(0);
+	sleep(100);
 	
 	return 0;
 }	
@@ -107,10 +124,5 @@ FeatureMapData read_autoencoder_feature_map(const char* filename)
 	feature_map_data.image_height = patch_size;
 
 	return feature_map_data;  
-}
-
-void draw(std::vector<double> data, size_t width, size_t height)
-{
-	std::vector<int> image_data(data.begin(), data.end()); 
 }
 
