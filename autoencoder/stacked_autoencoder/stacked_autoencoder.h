@@ -36,13 +36,13 @@ struct param_config
             double do_compute_cost(nng::Vector& theta) const;// compute cost function
 
         private:
-            size_t input_size; // the number of input units
-            size_t hidden_size; // the number of hidden units
-            size_t num_classes;
-            se_net_config net_config;
-            double lambda; // weight decay parameter
-            nng::Matrix2d data;
-            nng::Vector labels;
+            size_t _input_size; // the number of input units
+            size_t _hidden_size; // the number of hidden units
+            size_t _num_classes;
+            se_net_config _net_config;
+            double _lambda; // weight decay parameter
+            nng::Matrix2d _data;
+            nng::Vector _labels;
 
     };
 
