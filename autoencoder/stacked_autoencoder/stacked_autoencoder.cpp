@@ -3,14 +3,14 @@
 #include <iostream>
 
 
-nng::StackedAutoencoder::StackedAutoencoder(size_t visible_size, size_t hidden_size, double sparsity_param, double lambda, double beta, size_t m, nng::Matrix2d& data):
-    visible_size(visible_size)
+nng::StackedAutoencoder::StackedAutoencoder(size_t input_size, size_t hidden_size, size_t num_classes, nng::se_net_config net_config, double lambda, double beta, size_t m, nng::Matrix2d& data, nng::Vector& labels;):
+    input_size(input_size)
     ,hidden_size(hidden_size)
-    ,sparsity_param(sparsity_param)
+    ,num_classes(num_classes)
+    ,net_config(net_config)
     ,lambda(lambda)
-    ,beta(beta)
-    ,grad(nng::Vector(hidden_size * visible_size * 2 + hidden_size + visible_size, 0))
     ,data(data)
+    ,labels(labels)
 {
 }
 
@@ -53,7 +53,36 @@ nng::param_config StackedAutoencoder::stack2params(se_stack& stack)
 	return param_net_config;
 }
 
+//Converts a flattened parameter vector into a "stack" structure for multilayer networks
 nng::se_stack StackedAutoencoder::params2stack(param_config& param_net_config)
 {
-	
+    nng::se_net_config net_config = param_net_config.net_config;
+    Vectord params = param_net_config.params;
+    
+    // Map the params (a vector into a stack of weights)
+    size_t depth = net_config.layer_sizes.size();
+    se_stack stack;
+    //stack = [dict() for i in range(depth)]
+
+    size_t prev_layer_size = net_config.input_size;
+    size_t current_pos = 0
+    size_t current_layer_size = 0;
+    
+    for (size_t i = 0; i < depth; i++)
+    {
+        current_layer_size = net_config.layer_sizes.at(i); 
+        // Extract weights and bias
+        size_t wlen = prev_layer_size * current_layer_size; 
+        //stack[i]['w'] = params[current_pos:current_pos + wlen].reshape(net_config['layer_sizes'][i], prev_layer_size)
+        //stack[i]['b'] = params[current_pos:current_pos + blen]
+        stack.push_back(std::pair(nng::Matrix2d(current_layer_size, prev_layer_size, params.getSegment(current_pos, wlen)),
+                                  params(current_pos + wlen)));
+
+        current_pos = current_pos + wlen + 1;
+
+        // Set previous layer size
+        prev_layer_size = current_layer_size;
+    }
+
+    return stack
 }
