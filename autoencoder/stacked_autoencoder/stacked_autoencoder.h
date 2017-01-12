@@ -8,19 +8,20 @@
 namespace nng{
 
 	
-typedef se_stack std::vector<std::pair<Matrix2d, double>>; // vector of (w_i,b_i)
+	typedef std::vector<std::pair<Matrix2d, double>> se_stack; // vector of (w_i,b_i)
 
-struct se_net_config
-{
-	size_t input_size;
-	std::vector<size_t> layer_sizes;
-}
+	struct se_net_config
+	{
+		size_t input_size;
+		std::vector<size_t> layer_sizes;
+	};
 
-struct param_config
-{
-	Vectord params; // vector of w_i b_i
-	se_net_config  net_config;
-}
+	struct param_config
+	{
+		nng::Vector params; // vector of w_i b_i
+		se_net_config  net_config;
+		param_config(nng::Vector& params, se_net_config& net_config):params(params), net_config(net_config){};
+	};
 
 
     class StackedAutoencoder
@@ -30,7 +31,7 @@ struct param_config
             ~StackedAutoencoder();
 
             param_config stack2params(se_stack& stack);
-			se_stack params2stack(param_config& param_net_config);
+			se_stack params2stack(param_config& param_net_config) const;
             double operator() (column_vector x) const;
             double compute_cost(column_vector& x) const;
             double do_compute_cost(nng::Vector& theta) const;// compute cost function

@@ -1,10 +1,10 @@
-#include "StackedAutoencoder.h"
+#include "stacked_autoencoder.h"
 #include <math.h>
 #include <iostream>
 
 
-nng::StackedAutoencoder::StackedAutoencoder(size_t input_size, size_t hidden_size, size_t num_classes, nng::se_net_config net_config, double lambda, double beta, size_t m, nng::Matrix2d& data, nng::Vector& labels):
-    input_size(input_size)
+nng::StackedAutoencoder::StackedAutoencoder(size_t input_size, size_t hidden_size, size_t num_classes, nng::se_net_config net_config, double lambda, nng::Matrix2d& data, nng::Vector& labels):
+    _input_size(input_size)
     ,_hidden_size(hidden_size)
     ,_num_classes(num_classes)
     ,_net_config(net_config)
@@ -20,11 +20,11 @@ nng::StackedAutoencoder::~StackedAutoencoder()
 
 //typedef se_net_config std::map<std::string,std::vector<size_t>>;	
 //typedef se_stack std::vector<std::pair<Matrix2d, double>>;
-nng::param_config StackedAutoencoder::stack2params(se_stack& stack)
+nng::param_config nng::StackedAutoencoder::stack2params(se_stack& stack)
 {
     nng::Vector params(0,0.0); 
 	
-    for (std::pair s : stack)
+    for (std::pair<nng::Matrix2d, double> s : stack)
 	{
 		nng::Matrix2d w(s.first);
         params = params.concatenate(w.toVector());//s['w']
@@ -41,20 +41,19 @@ nng::param_config StackedAutoencoder::stack2params(se_stack& stack)
     else
 	{
         net_config.input_size = stack[0].first.get_cols();
-        for (std::pair s : stack)
+        for (std::pair<nng::Matrix2d, double> s : stack)
 		{
             net_config.layer_sizes.push_back(s.first.get_rows());
 		}
 	}	
-	nng::param_config param_net_config;
-	param_net_config.params = params;
-	param_net_config.net_config = net_config;
+	nng::param_config param_net_config(params,net_config);
+
 	
 	return param_net_config;
 }
 
 //Converts a flattened parameter vector into a "stack" structure for multilayer networks
-nng::se_stack StackedAutoencoder::params2stack(param_config& param_net_config)
+nng::se_stack nng::StackedAutoencoder::params2stack(nng::param_config& param_net_config) const
 {
     nng::se_net_config net_config = param_net_config.net_config;
     nng::Vector params = param_net_config.params;
@@ -65,7 +64,7 @@ nng::se_stack StackedAutoencoder::params2stack(param_config& param_net_config)
     //stack = [dict() for i in range(depth)]
 
     size_t prev_layer_size = net_config.input_size;
-    size_t current_pos = 0
+    size_t current_pos = 0;
     size_t current_layer_size = 0;
     
     for (size_t i = 0; i < depth; i++)
@@ -75,7 +74,7 @@ nng::se_stack StackedAutoencoder::params2stack(param_config& param_net_config)
         size_t wlen = prev_layer_size * current_layer_size; 
         //stack[i]['w'] = params[current_pos:current_pos + wlen].reshape(net_config['layer_sizes'][i], prev_layer_size)
         //stack[i]['b'] = params[current_pos:current_pos + blen]
-        stack.push_back(std::pair(nng::Matrix2d(current_layer_size, prev_layer_size, params.getSegment(current_pos, wlen)),
+        stack.push_back(std::pair<nng::Matrix2d, double>(nng::Matrix2d(current_layer_size, prev_layer_size, params.getSegment(current_pos, wlen)),
                                   params(current_pos + wlen)));
 
         current_pos = current_pos + wlen + 1;
@@ -84,40 +83,40 @@ nng::se_stack StackedAutoencoder::params2stack(param_config& param_net_config)
         prev_layer_size = current_layer_size;
     }
 
-    return stack
+    return stack;
 }
 
-double StackedAutoencoder::operator() (nng::column_vector x) const
+double nng::StackedAutoencoder::operator() (nng::column_vector x) const
 {
 	return compute_cost(x);
 }
 
-double StackedAutoencoder::compute_cost(nng::column_vector& x) const
+double nng::StackedAutoencoder::compute_cost(nng::column_vector& x) const
 {
     nng::Vector v = nng::column_vector_to_cnn_vector(x);
     return do_compute_cost(v);	
 }
 
-double StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
+double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
 {
     // We first extract the part which compute the softmax gradient
     nng::Matrix2d softmax_theta(_num_classes, _hidden_size, theta.getSegment(0,_hidden_size*_num_classes));//[0:hidden_size * num_classes].reshape(num_classes, hidden_size)
 
     // Extract out the "stack"
-	nng::param_config param_net_config;
-	param_net_config.params = theta.getSegment(_hidden_size*_num_classes,theta.get_length() - _hidden_size*_num_classes);
-	param_net_config.net_config = _net_config;
-    se_stack stack = params2stack(param_net_config);
+	nng::Vector params = theta.getSegment(_hidden_size*_num_classes,theta.get_length() - _hidden_size*_num_classes);
+	nng::se_net_config net_config = _net_config;
+	nng::param_config param_net_config(params,net_config);
+    nng::se_stack stack = params2stack(param_net_config);
 
     size_t m = _data.get_cols();
 
     // Forward propagation
     std::vector<nng::Matrix2d> a;
 	a.push_back(_data);
-    std::vector<nng::Vector> z; 
-	z.push_back(0); // Dummy value
+    std::vector<nng::Matrix2d> z; 
+	z.push_back(nng::Matrix2d(1,1,0)); // Dummy value
 
-    for (std::pair s : stack)
+    for (std::pair<nng::Matrix2d, double> s : stack)
 	{
         z.push_back(s.first*(a.back()) + s.second);
         a.push_back(z.back().sigmoid());
@@ -134,4 +133,6 @@ double StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
 	}
 
 	double cost =  (-1.0 / m) *( (indicator.dot(prob.log())).sum() ) + 0.5 * _lambda * (softmax_theta.dot(softmax_theta)).sum();
+	
+	return cost;
 }

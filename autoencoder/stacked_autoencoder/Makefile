@@ -1,6 +1,6 @@
 TARGET =main_stacked_autoencoder
-OBJS =stacked_autoencoder.o
-INCLUDE_DIR = -I. -I../../libcnn -I../../dlib-master/ -I../sparse_autoencoder/
+OBJS =stacked_autoencoder.o main_stacked_autoencoder.o
+INCLUDE_DIR = -I. -I../../libcnn -I../../dlib-master/ 
 
 CC = g++ -g -std=c++0x 
 CXXFLAGS += -D_REENTRANT -fPIC -Wall -Werror -g -std=c++0x $(INCLUDE_DIR) 
@@ -8,7 +8,7 @@ LDFLAGS =-lpthread ../../libcnn/libcnn.so ../../dlib-master/build/dlib/libdlib.s
 
 all: $(TARGET)
 
-main_sparseAE: $(OBJS)
+$(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
