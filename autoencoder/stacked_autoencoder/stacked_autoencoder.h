@@ -23,15 +23,16 @@ namespace nng{
 		param_config(nng::Vector& params, se_net_config& net_config):params(params), net_config(net_config){};
 	};
 
-
+	param_config stack2params(se_stack& stack);
+	se_stack params2stack(param_config& param_net_config);
+			
     class StackedAutoencoder
     {
         public:
             StackedAutoencoder(size_t input_size, size_t hidden_size, size_t num_classes, nng::se_net_config net_config, double lambda, nng::Matrix2d& data, nng::Vector& labels);
             ~StackedAutoencoder();
 
-            param_config stack2params(se_stack& stack);
-			se_stack params2stack(param_config& param_net_config) const;
+
             double operator() (column_vector x) const;
             double compute_cost(column_vector& x) const;
             double do_compute_cost(nng::Vector& theta) const;// compute cost function

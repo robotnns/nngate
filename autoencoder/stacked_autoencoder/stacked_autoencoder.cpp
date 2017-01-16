@@ -20,7 +20,7 @@ nng::StackedAutoencoder::~StackedAutoencoder()
 
 //typedef se_net_config std::map<std::string,std::vector<size_t>>;	
 //typedef se_stack std::vector<std::pair<Matrix2d, double>>;
-nng::param_config nng::StackedAutoencoder::stack2params(se_stack& stack)
+nng::param_config nng::stack2params(se_stack& stack)
 {
     nng::Vector params(0,0.0); 
 	
@@ -53,7 +53,7 @@ nng::param_config nng::StackedAutoencoder::stack2params(se_stack& stack)
 }
 
 //Converts a flattened parameter vector into a "stack" structure for multilayer networks
-nng::se_stack nng::StackedAutoencoder::params2stack(nng::param_config& param_net_config) const
+nng::se_stack nng::params2stack(nng::param_config& param_net_config) const
 {
     nng::se_net_config net_config = param_net_config.net_config;
     nng::Vector params = param_net_config.params;
@@ -99,13 +99,12 @@ double nng::StackedAutoencoder::compute_cost(nng::column_vector& x) const
 
 double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
 {
-    // We first extract the part which compute the softmax gradient
-    nng::Matrix2d softmax_theta(_num_classes, _hidden_size, theta.getSegment(0,_hidden_size*_num_classes));//[0:hidden_size * num_classes].reshape(num_classes, hidden_size)
+    // extract the part which compute the softmax gradient
+    nng::Matrix2d softmax_theta(_num_classes, _hidden_size, theta.getSegment(0,_hidden_size*_num_classes));
 
     // Extract out the "stack"
 	nng::Vector params = theta.getSegment(_hidden_size*_num_classes,theta.get_length() - _hidden_size*_num_classes);
-	nng::se_net_config net_config = _net_config;
-	nng::param_config param_net_config(params,net_config);
+	nng::param_config param_net_config(params,_net_config);
     nng::se_stack stack = params2stack(param_net_config);
 
     size_t m = _data.get_cols();
