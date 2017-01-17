@@ -1,28 +1,28 @@
-#include "SparseAutoencoderGrad.h"
+#include "StackedAutoencoderGrad.h"
 #include <math.h>
 #include <iostream>
 
 
-nng::SparseAutoencoderGrad::SparseAutoencoderGrad(size_t visible_size, size_t hidden_size, double sparsity_param, double lambda, double beta, size_t m, nng::Matrix2d& data):
-    visible_size(visible_size)
-    ,hidden_size(hidden_size)
-    ,sparsity_param(sparsity_param)
-    ,lambda(lambda)
-    ,beta(beta)
-    ,grad(nng::Vector(hidden_size * visible_size * 2 + hidden_size + visible_size, 0))
-    ,data(data)
+nng::StackedAutoencoderGrad::StackedAutoencoderGrad(size_t input_size, size_t hidden_size, size_t num_classes, nng::se_net_config net_config, double lambda, nng::Matrix2d& data, nng::Vector& labels):
+    _input_size(input_size)
+    ,_hidden_size(hidden_size)
+    ,_num_classes(num_classes)
+    ,_net_config(net_config)
+    ,_lambda(lambda)
+    ,_data(data)
+    ,_labels(labels)
 {
 }
 
-nng::SparseAutoencoderGrad::~SparseAutoencoderGrad()
+nng::StackedAutoencoderGrad::~StackedAutoencoderGrad()
 {
 }
 
-const nng::column_vector nng::SparseAutoencoderGrad::operator() (const nng::column_vector x) const {  return compute_grad(x); } 
+const nng::column_vector nng::StackedAutoencoderGrad::operator() (const nng::column_vector x) const {  return compute_grad(x); } 
 
 
 
-const nng::column_vector nng::SparseAutoencoderGrad::compute_grad(const nng::column_vector& x) const
+const nng::column_vector nng::StackedAutoencoderGrad::compute_grad(const nng::column_vector& x) const
 {
 
     nng::Vector v = nng::column_vector_to_cnn_vector(x);
@@ -32,14 +32,15 @@ const nng::column_vector nng::SparseAutoencoderGrad::compute_grad(const nng::col
 }
         
 
-const nng::Vector nng::SparseAutoencoderGrad::do_compute_grad(nng::Vector& theta) const
+const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& theta) const
 {
     // extract the part which compute the softmax gradient
     nng::Matrix2d softmax_theta(_num_classes, _hidden_size, theta.getSegment(0,_hidden_size*_num_classes));
 
     // Extract out the "stack"
 	nng::Vector params = theta.getSegment(_hidden_size*_num_classes,theta.get_length() - _hidden_size*_num_classes);
-	nng::param_config param_net_config(params,_net_config);
+	nng::se_net_config net_config = _net_config;
+	nng::param_config param_net_config(params,net_config);
     nng::se_stack stack = params2stack(param_net_config);
 
     size_t m = _data.get_cols();
@@ -82,7 +83,8 @@ const nng::Vector nng::SparseAutoencoderGrad::do_compute_grad(nng::Vector& theta
 	std::vector<nng::Matrix2d>::iterator it;
 	for (size_t i = stack.size()-1; i>=0; i--)
 	{
-		d = stack[i].first.transpose()*delta[0] * (z[i].sigmoid_prime());
+		d = stack[i].first.transpose()*delta[0];
+		d = d.dot(z[i].sigmoid_prime());
 		it = delta.begin();
 		delta.insert(it,d);
 	}
@@ -90,14 +92,21 @@ const nng::Vector nng::SparseAutoencoderGrad::do_compute_grad(nng::Vector& theta
       //  d = stack[i]['w'].transpose().dot(delta[0]) * sigmoid_prime(z[i])
       //  delta.insert(0, d)
 
-    //// Compute gradients
-    //stack_grad = [dict() for i in range(len(stack))]
-    //for i in range(len(stack_grad)):
-      //  stack_grad[i]['w'] = delta[i + 1].dot(a[i].transpose()) / m
-      //  stack_grad[i]['b'] = np.sum(delta[i + 1], axis=1) / m
+    // Compute gradients
+	nng::se_stack_grad stack_grad;
+	nng::Matrix2d grad_w_i(0,0,0);
+	nng::Vector grad_b_i(0,0);
+	for (size_t i = 0; i<stack.size(); i++)
+	{
+		grad_w_i = (delta[i+1]*a[i].transpose())/(double)m;
+		grad_b_i = delta[i+1].sum(1)/(double)m;
+		
+		stack_grad.push_back(std::pair<nng::Matrix2d, nng::Vector>(grad_w_i,grad_b_i));
+	}
 
-    //grad_params, net_config = stack2params(stack_grad)
-    //grad = np.concatenate((softmax_grad.flatten(), grad_params))
+	nng::param_config param_net_config_grad = nng::stack2params(stack_grad);
+	nng::Vector grad_params = param_net_config_grad.params;
+	nng::Vector grad = softmax_grad.to_cnnvector().concatenate(grad_params);
  
-    //return grad;
+    return grad;
 }

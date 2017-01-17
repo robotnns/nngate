@@ -52,15 +52,47 @@ nng::param_config nng::stack2params(se_stack& stack)
 	return param_net_config;
 }
 
+nng::param_config nng::stack2params(se_stack_grad& stack_grad)
+{
+    nng::Vector params(0,0.0); 
+	
+    for (std::pair<nng::Matrix2d, nng::Vector> s : stack_grad)
+	{
+		nng::Matrix2d w(s.first);
+        params = params.concatenate(w.toVector());//s['w']
+		nng::Vector b(s.second);
+        params = params.concatenate(b);//s['b']
+	}
+
+    nng::se_net_config net_config;
+
+    if (stack_grad.size() == 0)
+	{
+        net_config.input_size = 0;
+	}
+    else
+	{
+        net_config.input_size = stack_grad[0].first.get_cols();
+        for (std::pair<nng::Matrix2d, nng::Vector> s : stack_grad)
+		{
+            net_config.layer_sizes.push_back(s.first.get_rows());
+		}
+	}	
+	nng::param_config param_net_config(params,net_config);
+
+	
+	return param_net_config;
+}
+
 //Converts a flattened parameter vector into a "stack" structure for multilayer networks
-nng::se_stack nng::params2stack(nng::param_config& param_net_config) const
+nng::se_stack nng::params2stack(nng::param_config& param_net_config)
 {
     nng::se_net_config net_config = param_net_config.net_config;
     nng::Vector params = param_net_config.params;
     
     // Map the params (a vector into a stack of weights)
     size_t depth = net_config.layer_sizes.size();
-    se_stack stack;
+    nng::se_stack stack;
     //stack = [dict() for i in range(depth)]
 
     size_t prev_layer_size = net_config.input_size;
@@ -104,7 +136,8 @@ double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
 
     // Extract out the "stack"
 	nng::Vector params = theta.getSegment(_hidden_size*_num_classes,theta.get_length() - _hidden_size*_num_classes);
-	nng::param_config param_net_config(params,_net_config);
+	nng::se_net_config net_config = _net_config;
+	nng::param_config param_net_config(params,net_config);
     nng::se_stack stack = params2stack(param_net_config);
 
     size_t m = _data.get_cols();

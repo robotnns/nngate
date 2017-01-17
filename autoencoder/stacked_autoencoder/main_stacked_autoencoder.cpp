@@ -1,17 +1,18 @@
 #include "nng_math.h"
 
-//#include "SparseAutoencoder.h"
-//#include "SparseAutoencoderGrad.h"
-//#include "Softmax.h"
-//#include "SoftmaxGrad.h"
+#include "SparseAutoencoder.h"
+#include "SparseAutoencoderGrad.h"
+#include "Softmax.h"
+#include "SoftmaxGrad.h"
 #include <iostream>
 #include <pixdb.h>
 #include "dlib/optimization/optimization.h"
 #include <fstream>
 #include "stacked_autoencoder.h"
+#include "StackedAutoencoderGrad.h"
 
 nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size);
-
+nng::Vector softmax_train(nng::Softmax& sm, nng::SoftmaxGrad& sm_grad, nng::Matrix2d& test_features, nng::Vector& test_labels);
 
 int main(int argc, char **argv) 
 {
@@ -96,8 +97,8 @@ int main(int argc, char **argv)
 	nng::SoftmaxGrad sm_grad(num_classes, hidden_size_L2, lambda_softmax, sae2_features, train_labels);
 
 	nng::Vector softmax_theta = softmax_train(sm, sm_grad, sae2_features, train_labels);	
-	size_t softmax_input_size = hidden_size_L2;
-	size_t softmax_num_classes = num_classes;
+	//size_t softmax_input_size = hidden_size_L2;
+	//size_t softmax_num_classes = num_classes;
 	
 	// Finetune softmax model
 	// Initialize the stack using the parameters learned
@@ -116,7 +117,7 @@ int main(int argc, char **argv)
 	nng::Vector stacked_autoencoder_theta = softmax_theta.concatenate(stack_params);
 	
 	nng::StackedAutoencoder sae(input_size, hidden_size_L2, num_classes, net_config, lambda, train_images, train_labels);
-	//nng::StackedAutoencoderGrad sae_grad(input_size, hidden_size_L2, num_classes, net_config, lambda, train_images, train_labels);
+	nng::StackedAutoencoderGrad sae_grad(input_size, hidden_size_L2, num_classes, net_config, lambda, train_images, train_labels);
 	//nng::Vector stacked_autoencoder_opt_theta = stacked_autoencoder_compute_theta(sae,sae_grad);
 
 	return 0;

@@ -9,6 +9,7 @@ namespace nng{
 
 	
 	typedef std::vector<std::pair<Matrix2d, double>> se_stack; // vector of (w_i,b_i)
+	typedef std::vector<std::pair<Matrix2d, Vector>> se_stack_grad; // vector of (grad_w_i, grad_b_i)
 
 	struct se_net_config
 	{
@@ -24,6 +25,7 @@ namespace nng{
 	};
 
 	param_config stack2params(se_stack& stack);
+	param_config stack2params(se_stack_grad& stack_grad);
 	se_stack params2stack(param_config& param_net_config);
 			
     class StackedAutoencoder
