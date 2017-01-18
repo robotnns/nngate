@@ -1,5 +1,5 @@
 TARGET =main_stacked_autoencoder
-OBJS =../sparse_autoencoder/SparseAutoencoder.o ../sparse_autoencoder/SparseAutoencoderGrad.o ../sparse_autoencoder/Softmax.o ../sparse_autoencoder/SoftmaxGrad.o stacked_autoencoder.o StackedAutoencoderGrad.o main_stacked_autoencoder.o
+OBJS =../sparse_autoencoder/SparseAutoencoder.o ../sparse_autoencoder/SparseAutoencoderGrad.o ../sparse_autoencoder/Softmax.o ../sparse_autoencoder/SoftmaxGrad.o StackedAutoencoder.o StackedAutoencoderGrad.o main_stacked_autoencoder.o
 INCLUDE_DIR = -I. -I../../libcnn -I../../dlib-master/ -I../sparse_autoencoder
 
 CC = g++ -g -std=c++0x 

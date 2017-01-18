@@ -3,7 +3,7 @@
 
 #include "nng_math.h"
 #include "dlib/matrix/matrix.h"
-#include "stacked_autoencoder.h"
+#include "StackedAutoencoder.h"
 
 
 namespace nng{
