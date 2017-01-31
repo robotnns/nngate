@@ -186,7 +186,7 @@ void Vector::print()
 // Get submatrix of length = len starting at start_index
 Vector Vector::getSegment(size_t start_index, size_t len) const
 {
-  assert (start_index < length && start_index + len < length);
+  assert (start_index < length && start_index + len <= length);
   Vector result(len, 0.0);
 
   for (size_t i=0; i<len; ++i) {

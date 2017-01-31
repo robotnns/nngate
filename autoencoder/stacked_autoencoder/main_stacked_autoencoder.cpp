@@ -4,13 +4,25 @@
 #include "SparseAutoencoderGrad.h"
 #include "Softmax.h"
 #include "SoftmaxGrad.h"
+#include "StackedAutoencoder.h"
+#include "StackedAutoencoderGrad.h"
 #include <iostream>
 #include <pixdb.h>
 #include "dlib/optimization/optimization.h"
 #include <fstream>
-#include "StackedAutoencoder.h"
-#include "StackedAutoencoderGrad.h"
 
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> tokens;
+    while (std::getline(ss, item, delim)) {
+        tokens.push_back(item);
+    }
+    return tokens;
+}
+
+nng::Vector read_opt_theta_from_file(const char* filename);
 nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size, const std::string& filename);
 nng::Vector softmax_train(nng::Softmax& sm, nng::SoftmaxGrad& sm_grad, nng::Matrix2d& test_features, nng::Vector& test_labels);
 //nng::Vector stacked_autoencoder_compute_theta(nng::StackedAutoencoder& ae, nng::StackedAutoencoderGrad& ae_grad);
@@ -107,17 +119,19 @@ int main(int argc, char **argv)
 		test_labels(i + m_test_1) = 1;
 	}
 	
-	
+	m_image = 0;
 	// train autoencoder 1
 	nng::SparseAutoencoder ae1(input_size, hidden_size_L1, sparsity_param, lambda, beta, m,train_images);
 	nng::SparseAutoencoderGrad ae1_grad(input_size, hidden_size_L1, sparsity_param, lambda, beta, m,train_images);
-	nng::Vector sae1_opt_theta = autoencoder_compute_theta(ae1,ae1_grad, patch_size,"opt_theta_file_ae1.txt");//sae1_opt_theta=[w1_ae1,w2_ae1,b1_ae1,b2_ae1]
+	//nng::Vector sae1_opt_theta = autoencoder_compute_theta(ae1,ae1_grad, patch_size,"opt_theta_file_ae1.dat");//sae1_opt_theta=[w1_ae1,w2_ae1,b1_ae1,b2_ae1]
+	nng::Vector sae1_opt_theta = read_opt_theta_from_file("opt_theta_file_ae1.dat");
 	
 	// train autoencoder 2
 	nng::Matrix2d sae1_features = ae1.sparse_autoencoder(sae1_opt_theta, hidden_size_L1, input_size, train_images);
 	nng::SparseAutoencoder ae2(hidden_size_L1, hidden_size_L2, sparsity_param, lambda, beta, m,sae1_features);
 	nng::SparseAutoencoderGrad ae2_grad(hidden_size_L1, hidden_size_L2, sparsity_param, lambda, beta, m,sae1_features);	
-	nng::Vector sae2_opt_theta = autoencoder_compute_theta(ae2,ae2_grad, 14,"opt_theta_file_ae2.txt");//sae2_opt_theta=[w1_ae2,w2_ae2,b1_ae2,b2_ae2]
+	//nng::Vector sae2_opt_theta = autoencoder_compute_theta(ae2,ae2_grad, 14,"opt_theta_file_ae2.dat");//sae2_opt_theta=[w1_ae2,w2_ae2,b1_ae2,b2_ae2]
+	nng::Vector sae2_opt_theta = read_opt_theta_from_file("opt_theta_file_ae2.dat");
 	
 	// train softmax classifier
 	nng::Matrix2d sae2_features = ae2.sparse_autoencoder(sae2_opt_theta, hidden_size_L2, hidden_size_L1, sae1_features);
@@ -130,7 +144,7 @@ int main(int argc, char **argv)
 	//size_t softmax_num_classes = num_classes;
 	
 	// Finetune softmax model
-	// Initialize the stack using the parameters learned
+	std::cout << "Initialize the stack using the parameters learned" << std::endl;
 	nng::se_stack stack;
 
 	nng::Matrix2d w1_ae1(hidden_size_L1, input_size, sae1_opt_theta.getSegment(0,hidden_size_L1*input_size));//dim w1_ae1:hidden_size_L1*input_size
@@ -139,26 +153,30 @@ int main(int argc, char **argv)
 	double b1_ae2 = sae2_opt_theta(2*hidden_size_L2*hidden_size_L1);	
 	stack.push_back(std::pair<nng::Matrix2d, double>(w1_ae1, b1_ae1));
 	stack.push_back(std::pair<nng::Matrix2d, double>(w1_ae2, b1_ae2));
-	//Initialize the parameters for the deep model
+	std::cout << "Initialize the parameters for the deep model" << std::endl;
 	nng::param_config param_net_config = nng::stack2params(stack);
 	nng::Vector stack_params = param_net_config.params;//stack_params=[w1_ae1,b1_ae1,w1_ae2,b1_ae2]
 													   //dim stack_params: hidden_size_L1*input_size + 1 + hidden_size_L2*hidden_size_L1 + 1
-	nng::se_net_config net_config = param_net_config.net_config;
+	nng::se_net_config net_config = param_net_config.net_config;//input_size, layer_sizes
 	nng::Vector stacked_autoencoder_theta = softmax_theta.concatenate(stack_params);// stacked_autoencoder_theta=[softmax_theta,w1_ae1,b1_ae1,w1_ae2,b1_ae2]
-	
+	//dim stacked_autoencoder_theta: num_classes*hidden_size_L2 + hidden_size_L1*input_size + 1 + hidden_size_L2*hidden_size_L1 + 1
 	nng::StackedAutoencoder sae(input_size, hidden_size_L2, num_classes, net_config, lambda, train_images, train_labels);
 	nng::StackedAutoencoderGrad sae_grad(input_size, hidden_size_L2, num_classes, net_config, lambda, train_images, train_labels);
 	//nng::Vector stacked_autoencoder_opt_theta = stacked_autoencoder_compute_theta(sae,sae_grad);
 	
 	nng::column_vector x_stacked_autoencoder_theta = nng::cnn_vector_to_column_vector(stacked_autoencoder_theta);
-	double stacked_autoencoder_opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(30), dlib::objective_delta_stop_strategy(1e-10), sae, 
+/*	sae(x_stacked_autoencoder_theta);
+	sae_grad(x_stacked_autoencoder_theta);
+	sae(x_stacked_autoencoder_theta);
+	sae_grad(x_stacked_autoencoder_theta);*/
+	double stacked_autoencoder_opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(10), dlib::objective_delta_stop_strategy(1e-7), sae, 
 														sae_grad, x_stacked_autoencoder_theta, -1);
 
 	std::cout<<stacked_autoencoder_opt_cost<<std::endl;
 	nng::Vector stacked_autoencoder_opt_theta = nng::column_vector_to_cnn_vector(x_stacked_autoencoder_theta);
 	
 	std::ofstream opt_theta_file_sae;
-	opt_theta_file_sae.open ("opt_theta_file_sae.txt");
+	opt_theta_file_sae.open ("opt_theta_file_sae.dat");
 	opt_theta_file_sae << "num_classes";
 	opt_theta_file_sae << num_classes << "\n";
 	opt_theta_file_sae << "hidden_size_L1\n";
@@ -192,6 +210,54 @@ int main(int argc, char **argv)
 	
 	return 0;
 }	
+
+nng::Vector read_opt_theta_from_file(const char* filename)
+{
+  std::cout << "Opening opt_theta file"<<std::endl;
+  std::string line;
+  std::ifstream opt_theta_file (filename);
+  size_t hidden_size = 0;
+  size_t input_size = 0;
+  size_t total_size = 0;
+  
+  if (opt_theta_file.is_open())
+  {
+	std::getline (opt_theta_file,line);
+	std::getline (opt_theta_file,line);
+	hidden_size = std::stoi(line);
+	std::cout << "hidden_size = "<< hidden_size << std::endl;
+	std::getline (opt_theta_file,line);
+	std::getline (opt_theta_file,line);
+	input_size = std::stoi(line);
+	std::cout << "input_size = "<< input_size << std::endl;
+	std::getline (opt_theta_file,line);
+	std::getline (opt_theta_file,line);
+	total_size = std::stoi(line);
+	std::cout << "total_size = "<< total_size << std::endl;
+	
+	std::getline (opt_theta_file,line);  
+	std::vector<std::string>   opt_theta_str = split(line, ' ');
+	assert(total_size == opt_theta_str.size());
+	
+	nng::Vector opt_theta(total_size,0);
+	for (size_t i = 0; i < opt_theta_str.size(); i++)
+	{
+		opt_theta(i) = std::stod(opt_theta_str[i]);
+	}
+	
+    opt_theta_file.close();
+	return opt_theta;
+  }
+
+  else
+  { 
+	  std::cout << "Unable to open opt_theta file"<<std::endl; 	
+	  nng::Vector opt_theta(total_size,0);
+	  return opt_theta;
+  }
+  
+  
+}
 
 nng::Vector softmax_train(nng::Softmax& sm, nng::SoftmaxGrad& sm_grad, nng::Matrix2d& test_features, nng::Vector& test_labels)
 {
