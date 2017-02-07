@@ -117,7 +117,7 @@ const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& thet
 															// dim grad_w_1: hidden_size_L2*hidden_size_L1
 		grad_b_i = delta[i+1].sum(1)/(double)m; // dim grad_b_0:hidden_size_L1, dim grad_b_1:hidden_size_L2
 		
-		stack_grad.push_back(std::pair<nng::Matrix2d, double>(grad_w_i,grad_b_i.sum()));
+		stack_grad.push_back(std::pair<nng::Matrix2d, double>(grad_w_i,grad_b_i[0]));
 	}
 
 	nng::param_config param_net_config_grad = nng::stack2params(stack_grad);

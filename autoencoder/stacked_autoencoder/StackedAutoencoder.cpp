@@ -68,7 +68,7 @@ double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
 	}
 
 	double cost =  (-1.0 / m) *( (indicator.dot(prob.log())).sum() ) + 0.5 * _lambda * (softmax_theta.dot(softmax_theta)).sum();
-	//std::cout << "StackedAutoencoder: Softmax cost = " << cost << std::endl;
+	std::cout << "StackedAutoencoder: cost = " << cost << std::endl;
 	return cost;
 }
 

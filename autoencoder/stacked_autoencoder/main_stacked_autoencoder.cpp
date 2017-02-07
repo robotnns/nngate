@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 		m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_images.set_col(m_patch.toVector(), m_train_1 + i);
-		train_labels(i) = 1;
+		train_labels(i+ m_train_1) = 1;
 	}
 	
 	
@@ -172,6 +172,7 @@ int main(int argc, char **argv)
 	double stacked_autoencoder_opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(10), dlib::objective_delta_stop_strategy(1e-7), sae, 
 														sae_grad, x_stacked_autoencoder_theta, -1);
 
+	std::cout<<"stacked_autoencoder_opt_cost"<<std::endl;
 	std::cout<<stacked_autoencoder_opt_cost<<std::endl;
 	nng::Vector stacked_autoencoder_opt_theta = nng::column_vector_to_cnn_vector(x_stacked_autoencoder_theta);
 	
@@ -193,7 +194,7 @@ int main(int argc, char **argv)
 	opt_theta_file_sae.close();
 	
 	
-	nng::Vector predictions = sae.stacked_autoencoder_predict(stacked_autoencoder_theta, test_data, sm);
+	nng::Vector predictions = sae.stacked_autoencoder_predict(stacked_autoencoder_opt_theta, test_data, sm);
 	std::cout<<"predictions ="<<std::endl;
 	predictions.print();
   	
