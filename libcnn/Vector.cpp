@@ -196,6 +196,19 @@ Vector Vector::getSegment(size_t start_index, size_t len) const
   return result;
 }
 
+// Get submatrix starting at start_index to the end
+Vector Vector::getTail(size_t start_index) const
+{
+  assert (start_index < length);
+  Vector result(len, 0.0);
+
+  for (size_t i=start_index; i<length; ++i) {
+      result(i-start_index) = vec[i];
+  }
+
+  return result;
+}
+
 void Vector::setSegment(size_t start_index, size_t len, const Vector& v)
 {
   for (size_t i=0; i<len; ++i) {
@@ -237,4 +250,34 @@ Vector Vector::kl_divergence(Vector& v)
 double Vector::sum()
 {
     return std::accumulate(vec.begin(), vec.end(), 0.0);
+}
+
+// power at each element
+Vector Vector::power(const double exponent)
+{
+  Vector result(*this);
+  for (size_t i=0; i<length; ++i) 
+  {
+      result(i) = pow(vec[i], exponent);
+  }
+  return result;
+}
+
+//
+double Vector::norm2()
+{
+  Vector v_square = this->power(2);
+  double result = std::sqrt(v_square.sum());
+  return result;	
+}
+
+// normalize the vector
+Vector Vector::normalize()
+{
+  double sum = this->norm2();
+  for (size_t i=0; i<length; ++i) 
+  {
+      result(i) = vec[i]/sum;
+  }
+  return result;	
 }

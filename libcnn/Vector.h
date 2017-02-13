@@ -42,11 +42,15 @@ namespace nng{
 
             void print();
             Vector getSegment(size_t start_index, size_t len) const;
+			Vector getTail(size_t start_index) const;
             void setSegment(size_t start_index, size_t len, const Vector& v);
             Vector concatenate(const Vectord& v);
             Vector concatenate(const Vector& v);
             Vector kl_divergence(Vector& v);
             double sum();
+			Vector power(const double exponent);
+			double norm2();
+			Vector normalize();
 
 
             void setLength(size_t len) {length = len;}

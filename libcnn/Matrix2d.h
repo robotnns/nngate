@@ -8,7 +8,7 @@
 #include "Vector.h"
 
 namespace nng{
-    
+
     class Matrix2d
     {
     public:
@@ -17,6 +17,7 @@ namespace nng{
         Matrix2d(size_t r, size_t c, const nng::Vector& v);
         Matrix2d(const Matrix2d& rhs);
         ~Matrix2d();
+		
 
         // Matrix/Matrix operations
         Matrix2d& operator=(const Matrix2d& rhs);
@@ -82,6 +83,14 @@ namespace nng{
         std::vector<Vectord> mat;
 
     };
+	
+	class Identity(size_t n):public Matrix2d(n,n,0)
+	{
+		for (size_t i = 0; i < n; ++i)
+		{
+			mat[i][i] = 1.0;
+		}
+	};
 
 }
 
