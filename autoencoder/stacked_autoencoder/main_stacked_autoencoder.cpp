@@ -23,7 +23,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 nng::Vector read_opt_theta_from_file(const char* filename);
-nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size, const std::string& filename);
+nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size, const std::string& filename, double min = -1);
 nng::Vector softmax_train(nng::Softmax& sm, nng::SoftmaxGrad& sm_grad, nng::Matrix2d& test_features, nng::Vector& test_labels);
 //nng::Vector stacked_autoencoder_compute_theta(nng::StackedAutoencoder& ae, nng::StackedAutoencoderGrad& ae_grad);
 
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	nng::Vector labels(m,0.0);
     nng::StackedAutoencoder stacked_ae(input_size, hidden_size, num_classes, net_config, lambda, data, labels);
 	*/
-	size_t patch_size = 28;
+	size_t patch_size = 48;
 	size_t input_size = patch_size*patch_size;
 	size_t num_classes = 2;
 	size_t hidden_size_L1 = 196;
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	double sparsity_param = 0.1;
 	double lambda = 0.003;
 	double beta = 3;
-	
+	double margin = 40;
 	//read train_images data
 	std::vector <STRU_PIXDB_REC_DOUBLE> v_image_in;	
 	pixdb pdb;
@@ -64,10 +64,13 @@ int main(int argc, char **argv)
 	size_t nb_image = v_image_in.size();
 	size_t nb_image2 = v_image_in2.size();
 	
-    size_t m_train_1 = nb_image / 2;
-	size_t m_train_2 = nb_image2 / 2;
+    size_t m_train_1 = nb_image/100*99;
+	size_t m_train_2 = nb_image2/100*99;
 	size_t m = m_train_1 + m_train_2;
-	
+	std::cout<<"nb of image 1 = "<<nb_image<<std::endl;
+	std::cout<<"nb of image 2 = "<<nb_image2<<std::endl;
+	std::cout<<"nb of training example 1 = "<<m_train_1<<std::endl;
+	std::cout<<"nb of training example 2 = "<<m_train_2<<std::endl;
 	nng::Matrix2d train_images(input_size,m,1);
 	nng::Vector train_labels(m,0.0);
 	size_t i_start_x, i_start_y;
@@ -75,8 +78,8 @@ int main(int argc, char **argv)
 	nng::Matrix2d m_patch(patch_size, patch_size,0);
 	for (size_t i = 0; i < m_train_1; i++)
 	{
-		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
+		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
+		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
         m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_images.set_col(m_patch.toVector(), i);
@@ -84,8 +87,8 @@ int main(int argc, char **argv)
 	}
 	for (size_t i = 0; i < m_train_2; i++)
 	{
-		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
+		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
+		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
 		m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_images.set_col(m_patch.toVector(), m_train_1 + i);
@@ -101,8 +104,8 @@ int main(int argc, char **argv)
 	nng::Vector test_labels(m_test,0.0);
 	for (size_t i = 0; i < m_test_1; i++)
 	{
-		i_start_x = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
-		i_start_y = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
+		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
+		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
         m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i + m_train_1].pix_buf);
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i);
@@ -111,8 +114,8 @@ int main(int argc, char **argv)
 	
 	for (size_t i = 0; i < m_test_2; i++)
 	{
-		i_start_x = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
-		i_start_y = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
+		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
+		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
         m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i + m_train_2].pix_buf);
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i + m_test_1);
@@ -123,15 +126,15 @@ int main(int argc, char **argv)
 	// train autoencoder 1
 	nng::SparseAutoencoder ae1(input_size, hidden_size_L1, sparsity_param, lambda, beta, m,train_images);
 	nng::SparseAutoencoderGrad ae1_grad(input_size, hidden_size_L1, sparsity_param, lambda, beta, m,train_images);
-	//nng::Vector sae1_opt_theta = autoencoder_compute_theta(ae1,ae1_grad, patch_size,"opt_theta_file_ae1.dat");//sae1_opt_theta=[w1_ae1,w2_ae1,b1_ae1,b2_ae1]
-	nng::Vector sae1_opt_theta = read_opt_theta_from_file("opt_theta_file_ae1.dat");
+	nng::Vector sae1_opt_theta = autoencoder_compute_theta(ae1,ae1_grad, patch_size,"opt_theta_file_ae1.dat", -1);//852//sae1_opt_theta=[w1_ae1,w2_ae1,b1_ae1,b2_ae1]
+	//nng::Vector sae1_opt_theta = read_opt_theta_from_file("opt_theta_file_ae1.dat");
 	
 	// train autoencoder 2
 	nng::Matrix2d sae1_features = ae1.sparse_autoencoder(sae1_opt_theta, hidden_size_L1, input_size, train_images);
 	nng::SparseAutoencoder ae2(hidden_size_L1, hidden_size_L2, sparsity_param, lambda, beta, m,sae1_features);
 	nng::SparseAutoencoderGrad ae2_grad(hidden_size_L1, hidden_size_L2, sparsity_param, lambda, beta, m,sae1_features);	
-	//nng::Vector sae2_opt_theta = autoencoder_compute_theta(ae2,ae2_grad, 14,"opt_theta_file_ae2.dat");//sae2_opt_theta=[w1_ae2,w2_ae2,b1_ae2,b2_ae2]
-	nng::Vector sae2_opt_theta = read_opt_theta_from_file("opt_theta_file_ae2.dat");
+	nng::Vector sae2_opt_theta = autoencoder_compute_theta(ae2,ae2_grad, 14,"opt_theta_file_ae2.dat",-1);//sae2_opt_theta=[w1_ae2,w2_ae2,b1_ae2,b2_ae2]
+	//nng::Vector sae2_opt_theta = read_opt_theta_from_file("opt_theta_file_ae2.dat");
 	
 	// train softmax classifier
 	nng::Matrix2d sae2_features = ae2.sparse_autoencoder(sae2_opt_theta, hidden_size_L2, hidden_size_L1, sae1_features);
@@ -275,7 +278,7 @@ nng::Vector softmax_train(nng::Softmax& sm, nng::SoftmaxGrad& sm_grad, nng::Matr
 	return opt_theta_sm;
 }
 
-nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size, const std::string& filename)
+nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAutoencoderGrad& ae_grad, size_t patch_size, const std::string& filename, double min)
 {
 
 	size_t input_size = ae.getVisibleSize();
@@ -289,7 +292,7 @@ nng::Vector autoencoder_compute_theta(nng::SparseAutoencoder& ae, nng::SparseAut
 	double opt_cost;
 	cout<<"computing opt cost ... "<<endl;
     opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(30), dlib::objective_delta_stop_strategy(1e-10), ae, //dlib::objective_delta_stop_strategy(1e-7).be_verbose()
-							  ae_grad, x_theta, -1);//363
+							  ae_grad, x_theta, min);//363
 //    opt_cost = dlib::find_min(dlib::lbfgs_search_strategy(10), dlib::objective_delta_stop_strategy(), ae, 
 //							  dlib::derivative(ae), x_theta, 0.528);
 							  
