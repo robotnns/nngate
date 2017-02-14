@@ -49,7 +49,7 @@ double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
     std::vector<nng::Matrix2d> a;
 	a.push_back(_data);
     std::vector<nng::Matrix2d> z; 
-	z.push_back(nng::Matrix2d(0,0,0)); // Dummy value
+	z.push_back(nng::Matrix2d(0,0)); // Dummy value
 
     for (std::pair<nng::Matrix2d, double> s : stack)
 	{
@@ -61,7 +61,7 @@ double nng::StackedAutoencoder::do_compute_cost(nng::Vector& theta) const
     prod = prod - prod.max();
 	
     nng::Matrix2d prob = prod.exp() / prod.exp().sum(0);
-	nng::Matrix2d indicator(_num_classes, m, 0.0); // dim indicator: num_classes*m
+	nng::Matrix2d indicator(_num_classes, m); // dim indicator: num_classes*m
 	for (size_t i = 0; i < m; ++i)
 	{
 		indicator(_labels(i), i) = 1.0; // the class of the i-th example is labels(i)
@@ -100,7 +100,7 @@ nng::Vector nng::StackedAutoencoder::stacked_autoencoder_predict(nng::Vector& op
     // Compute predictions
     std::vector<nng::Matrix2d> a; a.push_back(data);
     std::vector<nng::Matrix2d> z; 
-	z.push_back(nng::Matrix2d(0,0,0)); // Dummy value
+	z.push_back(nng::Matrix2d(0,0)); // Dummy value
 
 	//Sparse Autoencoder Computation
     for (std::pair<nng::Matrix2d, double> s : stack)

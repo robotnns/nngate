@@ -15,10 +15,13 @@ namespace nng{
     
     class  Vector
     {
-        public:
+	public:
+			Vector(size_t len);
             Vector(size_t len, const double& initial);
             Vector(const Vectord& v);
             Vector(const Vector& rhs);
+			Vector(Vector&& rhs);
+			Vector& operator=(Vector&& rhs);
             ~Vector(){};
 
             // Access the individual elements

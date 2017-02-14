@@ -10,6 +10,17 @@
 
 using namespace nng;
 using namespace std;
+
+Matrix2d::Matrix2d(size_t r, size_t c) 
+{
+  mat.resize(r);
+  for (size_t i=0; i<mat.size(); ++i) {
+    mat[i].resize(c);
+  }
+  rows = r;
+  cols = c;
+}
+
 Matrix2d::Matrix2d(size_t r, size_t c, const double& initial) 
 {
   mat.resize(r);
@@ -53,6 +64,28 @@ Matrix2d::Matrix2d(const Matrix2d& rhs)
   mat = rhs.mat;
   rows = rhs.get_rows();
   cols = rhs.get_cols();
+}
+
+Matrix2d::Matrix2d(Matrix2d&& rhs)   
+{
+  mat = rhs.mat;
+  rows = rhs.get_rows();
+  cols = rhs.get_cols();
+  rhs.mat.clear();
+}
+
+Matrix2d& Matrix2d::operator=(Matrix2d&& rhs)
+{
+	if (this!=&rhs)
+	{
+		// pilfer other’s resource
+		mat = rhs.mat;
+		rows = rhs.get_rows();
+		cols = rhs.get_cols();
+		// reset other
+		rhs.mat.clear();
+	}
+	return *this;
 }
 
 Matrix2d::~Matrix2d() {}

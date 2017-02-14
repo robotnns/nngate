@@ -1,4 +1,5 @@
 #include "nng_math_eig.h"
+#include "nng_math.h"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
@@ -12,46 +13,55 @@ const double epsilon = 0.000001;
 
 nng::EigenValueEigenVector::EigenValueEigenVector(const nng::Matrix2d& m)
 {
-    _v_pk.resize(m.get_cols());
+    _v_pk.resize(m.get_cols()-1);
+	compute_Pk(m);
 }
 
 nng::EigenValueEigenVector::~EigenValueEigenVector()
 {
-    for (size_t i = 0; i < _v_pk.size(); ++i)
-        delete[] _v_pk[i];
+   for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
+   {
+     delete (*it);
+   } 
     
 }
 
-std::vector<nng::Matrix2d*> nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& m)
+std::vector<nng::Matrix2d*> nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 {
-	size_t n = m.get_cols();
-    nng::Vectord col_k_tmp;
-	nng::Vector col_k(n,0.0);
-	nng::Vector d(n,0.0);
+	size_t n = A.get_cols();
+	nng::Vector col_k(n);
+	nng::Vector d(n);
 	double D;
-	nng::Vector v(n,0.0);
+	nng::Vector v(n);
 	double p;
-	nng::Matrix2d Pk(n,n,0.0);
-	nng::Matrix2d m_v(n,1,0.0);
-	nng::Matrix2d PA(n,n,0.0);
-    PA = m;
+	nng::Matrix2d Pk(n,n);
+	nng::Matrix2d m_v(n,1);
+	nng::Matrix2d PA(n,n);
+    PA = A;
     
-	for (size_t k = 0; k < n; ++k)
+	for (size_t k = 0; k < n-1; ++k)
 	{
-        col_k_tmp = PA.get_col(k);
-		col_k = nng::Vector(col_k_tmp);
+		// pull column k out of matrix P_{k-1}P_{k-2}...P_1A (just A if k=0)
+		col_k = nng::Vector(PA.get_col(k));
+		// normalize
 		d = col_k.normalize();
+		//D = +-sqrt(d_k^2 + ... + d_{n-1}^2), choose + if dk<=0
 		D = compute_D(d,k);
+		// v_0v_1=...=v_{k-1}=0
 		v(k) = std::sqrt( 0.5 * ( 1 - d(k)/D) );
 		p = -D * v(k);
 		for (size_t j = k+1; j <= n; ++j)
 		{
 			v(j) = d(j)/(2*p);
 		}
+		// m_v = [0,0,...,0,v_k,v_{k+1},v_{n-1}]^T
 		m_v = nng::Matrix2d(n,1,v);
-		Pk = nng::Identity(n);// - 2.0*m_v*(m_v.transpose());
+		// P_k = I - 2*m_v*m_v^T
+		Pk = nng::Identity(n) - 2.0*m_v*(m_v.transpose());
+		// for k+1, PA = P_{k}P_{k-1}...P_1A
         PA = Pk*PA;
-        _v_pk.push_back(new nng::Matrix2d(Pk));
+		
+        _v_pk[k] = new nng::Matrix2d(Pk);
 	}
     return _v_pk;
 }

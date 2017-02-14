@@ -54,7 +54,7 @@ const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& thet
     std::vector<nng::Matrix2d> a;
 	a.push_back(_data);//dim data = dim a[0]:input_size,m
     std::vector<nng::Matrix2d> z; 
-	z.push_back(nng::Matrix2d(_data.get_rows(),m,0)); // Dummy value
+	z.push_back(nng::Matrix2d(_data.get_rows(),m)); // Dummy value
 
     for (std::pair<nng::Matrix2d, double> s : stack)
 	{
@@ -68,7 +68,7 @@ const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& thet
     prod = prod - prod.max();
 	
     nng::Matrix2d prob = prod.exp() / prod.exp().sum(0);
-	nng::Matrix2d indicator(_num_classes, m, 0.0); // dim indicator: num_classes*m
+	nng::Matrix2d indicator(_num_classes, m); // dim indicator: num_classes*m
 	for (size_t i = 0; i < m; ++i)
 	{
 		indicator(_labels(i), i) = 1.0; // the class of the i-th example is labels(i)
@@ -87,7 +87,7 @@ const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& thet
 	delta.push_back(-softmax_grad_a.dot(z.back().sigmoid_prime())); // dim delta[0]: hidden_size_L2 * m
     //delta = [-softmax_grad_a * sigmoid_prime(z[-1])]
 	//std::cout << "StackedAutoencoderGrad: Compute d" << std::endl;
-	nng::Matrix2d d(1,1,0);
+	nng::Matrix2d d(1,1);
 	std::vector<nng::Matrix2d>::iterator it;
 	for (int i = stack.size()-1; i>=0; i--)
 	{
@@ -109,8 +109,8 @@ const nng::Vector nng::StackedAutoencoderGrad::do_compute_grad(nng::Vector& thet
 
     //std::cout << "StackedAutoencoderGrad: Compute gradients" << std::endl;
 	nng::se_stack stack_grad;
-	nng::Matrix2d grad_w_i(1,1,0);
-	nng::Vector grad_b_i(1,0);
+	nng::Matrix2d grad_w_i(1,1);
+	nng::Vector grad_b_i(1);
 	for (size_t i = 0; i<stack.size(); i++)
 	{
 		grad_w_i = (delta[i+1]*(a[i].transpose()))/(double)m;// dim grad_w_0: hidden_size_L1*input_size,

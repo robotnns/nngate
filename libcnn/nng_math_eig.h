@@ -19,7 +19,7 @@ namespace nng
             ~EigenValueEigenVector();
             
             pair_eigenvalue_eigenvector compute_eigenvalue_eigenvector_QR(const Matrix2d& m);
-            std::vector<Matrix2d*> compute_Pk(const Matrix2d& m);
+            std::vector<Matrix2d*> compute_Pk(const Matrix2d& A);
             double compute_D(const Vector& d, size_t k);
             
         private:

@@ -12,10 +12,13 @@ namespace nng{
     class Matrix2d
     {
     public:
+		Matrix2d(size_t r, size_t c);
         Matrix2d(size_t r, size_t c, const double& initial);
         Matrix2d(size_t r, size_t c, const Vectord& v);
         Matrix2d(size_t r, size_t c, const nng::Vector& v);
         Matrix2d(const Matrix2d& rhs);
+		Matrix2d(Matrix2d&& rhs);
+		Matrix2d& operator=(Matrix2d&& rhs);
         ~Matrix2d();
 		
 

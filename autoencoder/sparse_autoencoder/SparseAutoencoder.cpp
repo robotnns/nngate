@@ -20,8 +20,8 @@ nng::SparseAutoencoder::~SparseAutoencoder()
 
 nng::Vector nng::SparseAutoencoder::initialize()
 {
-    nng::Matrix2d W1(hidden_size, visible_size, 0);
-    nng::Matrix2d W2(visible_size, hidden_size, 0);
+    nng::Matrix2d W1(hidden_size, visible_size);
+    nng::Matrix2d W2(visible_size, hidden_size);
     double b1 = 0;
     double b2 = 0;
 

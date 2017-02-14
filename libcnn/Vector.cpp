@@ -9,11 +9,16 @@
 
 using namespace nng;
 using namespace std;
-Vector::Vector(size_t len, const double& initial)
+
+Vector::Vector(size_t len)
 {
     vec.resize(len);
-    for (size_t i=0; i<len; ++i)
-        vec[i] = initial;
+    length = len;
+}
+
+Vector::Vector(size_t len, const double& initial)
+{
+    vec.resize(len, initial);
     length = len;
 }
 
@@ -24,9 +29,30 @@ vec(v)
     length = v.size();
 }
 
-Vector::Vector(const Vector& rhs) {
+Vector::Vector(const Vector& rhs) 
+{
   vec = rhs.vec;
   length = rhs.get_length();
+}
+
+Vector::Vector(Vector&& rhs)   
+{
+  vec = rhs.vec;
+  length = rhs.get_length();
+  rhs.vec.clear();
+}
+
+Vector& Vector::operator=(Vector&& rhs)
+{
+	if (this!=&rhs)
+	{
+		// pilfer other’s resource
+		vec = rhs.vec;
+		length = rhs.get_length();
+		// reset other
+		rhs.vec.clear();
+	}
+	return *this;
 }
 
 // Access the individual elements
