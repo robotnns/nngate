@@ -200,7 +200,7 @@ Vector Vector::getSegment(size_t start_index, size_t len) const
 Vector Vector::getTail(size_t start_index) const
 {
   assert (start_index < length);
-  Vector result(len, 0.0);
+  Vector result(length-start_index, 0.0);
 
   for (size_t i=start_index; i<length; ++i) {
       result(i-start_index) = vec[i];
@@ -274,6 +274,7 @@ double Vector::norm2()
 // normalize the vector
 Vector Vector::normalize()
 {
+  Vector result(length, 0.0);
   double sum = this->norm2();
   for (size_t i=0; i<length; ++i) 
   {

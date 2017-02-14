@@ -74,7 +74,8 @@ namespace nng{
 		Vectord get_row(size_t index = 0) {return mat[index];}
         void set_col(const Vectord& v, size_t index);
 		void set_col(const nng::Vector& v, size_t index);
-
+        void setElement(double value, const size_t& row, const size_t& col);
+        
         void print();
 
     private:
@@ -84,12 +85,11 @@ namespace nng{
 
     };
 	
-	class Identity(size_t n):public Matrix2d(n,n,0)
+	class Identity:public Matrix2d
 	{
-		for (size_t i = 0; i < n; ++i)
-		{
-			mat[i][i] = 1.0;
-		}
+        public:
+        Identity(size_t n);
+
 	};
 
 }

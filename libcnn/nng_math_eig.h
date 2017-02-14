@@ -11,12 +11,20 @@
 
 namespace nng
 {
-	typedef std::pair<Vector, Matrix2d> pair_eigenvalue_eigenvector;
-    
-	pair_eigen_value_eigenvector compute_eigenvalue_eigenvector_QR(const Matrix2d& m);
-	
-	Matrix2d compute_Pk(const Matrix2d& m);
-	double compute_D(const Vector& d, size_t k);
+    typedef std::pair<Vector, Matrix2d> pair_eigenvalue_eigenvector;
+    class EigenValueEigenVector
+    {
+        public:
+            EigenValueEigenVector(const Matrix2d& m);
+            ~EigenValueEigenVector();
+            
+            pair_eigenvalue_eigenvector compute_eigenvalue_eigenvector_QR(const Matrix2d& m);
+            std::vector<Matrix2d*> compute_Pk(const Matrix2d& m);
+            double compute_D(const Vector& d, size_t k);
+            
+        private:
+            std::vector<Matrix2d*> _v_pk;
+    };
 }
 
 #endif

@@ -712,6 +712,10 @@ const double& Matrix2d::operator()(const size_t& row, const size_t& col) const
   return mat[row][col];
 }
 
+void Matrix2d::setElement(double value, const size_t& row, const size_t& col)
+{
+    mat[row][col] = value;
+}
 
 void Matrix2d::print()
 {
@@ -724,4 +728,12 @@ void Matrix2d::print()
     std::cout << std::endl;
   }
   std::cout << std::endl;
+}
+
+Identity::Identity(size_t n):Matrix2d(n,n,0)
+{
+    for (size_t i = 0; i < n; ++i)
+    {
+        setElement(1.0, i,i);
+    }
 }
