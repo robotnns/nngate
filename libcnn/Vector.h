@@ -4,15 +4,17 @@
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
-#include "dlib/matrix/matrix.h"
 
+#include "nng_type.h"
+#include "Matrix2d.h"
 
 
 namespace nng{
-    typedef std::vector<double> Vectord;
-    typedef dlib::matrix<double,0,1> column_vector;
-    const double epsilon = 0.000001;
+
+
     
+    
+	class Matrix2d;
     class  Vector
     {
 	public:
@@ -54,7 +56,7 @@ namespace nng{
 			Vector power(const double exponent);
 			double norm2();
 			Vector normalize();
-
+			Matrix2d toDiagonal();
 
             void setLength(size_t len) {length = len;}
             size_t get_length() const {return length;}

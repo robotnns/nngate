@@ -4,11 +4,14 @@
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
-#include "dlib/matrix/matrix.h"
+
+#include "nng_type.h"
 #include "Vector.h"
 
 namespace nng{
 
+	class Vector;
+	
     class Matrix2d
     {
     public:

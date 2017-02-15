@@ -19,14 +19,18 @@ namespace nng
             EigenValueEigenVector(const Matrix2d& A);
             ~EigenValueEigenVector();
             
-            pair_eigenvalue_eigenvector compute_eigenvalue_eigenvector_QR(Matrix2d& A);
+            void compute_eigenvalue_eigenvector_QR();
             bool compute_QR(Matrix2d& A);
             void compute_Pk(const Matrix2d& A); // compute householder matrices
             double compute_D(const Vector& d, size_t k);
             
+			const Vector& getEigenValue() const {return _eig.first;};
+			const Matrix2d& getEigenVector() const {return _eig.second;};
         private:
             std::vector<Matrix2d*> _v_pk;
             nng::Matrix2d _A;
+			nng::Matrix2d _S;
+			nng::pair_eigenvalue_eigenvector _eig;
     };
 }
 

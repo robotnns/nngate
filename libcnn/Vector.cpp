@@ -308,3 +308,11 @@ Vector Vector::normalize()
   }
   return result;	
 }
+
+Matrix2d Vector::toDiagonal()
+{
+	Matrix2d result(length, length);
+	for (size_t i=0; i<length; ++i)
+		result(i,i) = vec[i];
+	return result;
+}

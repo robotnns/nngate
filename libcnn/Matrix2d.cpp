@@ -595,10 +595,14 @@ bool Matrix2d::isUpperTriangle(double eps)
     if (_cols == 1) 
         return true;
 
-    double sum = 0;
-    for(size_t i = 1; i < _cols; ++i)
+    double sum = 0.0;
+    for(size_t i = 0; i < _cols; ++i)
+	{
         for(size_t j=i+1; j<_rows; ++j)
             sum += std::abs(_mat[j][i]);
+			
+	}
+	std::cout<<sum<<std::endl;
     if (sum < eps)
         return true;
     else
@@ -612,7 +616,7 @@ bool Matrix2d::isLowerTriangle(double eps)
     if (_rows == 1) 
         return true;
 
-    double sum = 0;
+    double sum = 0.0;
     for(size_t i = 1; i < _rows; ++i)
         for(size_t j=i+1; j<_cols; ++j)
             sum += std::abs(_mat[i][j]);
@@ -631,8 +635,11 @@ nng::Vector Matrix2d::getDiagonal()
 {
     assert(_cols == _rows);
     Vectord result;
-    for(size_t i = 1; i < _rows; ++i)
+    for(size_t i = 0; i < _rows; ++i)
+	{
         result.push_back(_mat[i][i]);
+		std::cout<<_mat[i][i]<<std::endl;
+	}
     return nng::Vector(result);
 }
 

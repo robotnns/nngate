@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "dlib/matrix/matrix.h"
 
+#include "nng_type.h"
 #include "Vector.h"
 #include "Matrix2d.h"
 

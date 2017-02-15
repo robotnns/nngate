@@ -1,4 +1,5 @@
 #include "nng_math.h"
+#include "nng_math_eig.h"
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -249,11 +250,38 @@ void testCnnVector()
 	
 }
 
-int main(int argc, char **argv) {
-  testMatrix2d();
-  testCnnVector();
-	
+void testStandardNormalDistrubutionGenerator()
+{
   cout<<"standard normal distribution generator"<<endl;
-  cout<<nng::normal_distribution_rand(0.0,1.0)<<endl;
+  cout<<nng::normal_distribution_rand(0.0,1.0)<<endl;	
+}
+
+void testEigenValueEigenVector()
+{
+	//nng::Matrix2d mat(2, 2);
+	//mat(0,0) = 2;
+	//mat(0,1) = 1;
+	//mat(1,0) = 1;
+	//mat(1,1) = 2;
+	nng::Matrix2d mat(3, 3);
+	mat(0,0) = 3;mat(0,1) = 0;mat(0,2) = 0;
+	mat(1,0) = 0;mat(1,1) = 1;mat(1,2) = 0;
+	mat(2,0) = 0;mat(2,1) = 0;mat(2,2) = 2;
+	nng::EigenValueEigenVector eig(mat);
+	nng::Vector eig_value(eig.getEigenValue());
+	nng::Matrix2d eig_vector(eig.getEigenVector());
+	eig_value.print();
+	eig_vector.print();
+	nng::Matrix2d result1(mat*eig_vector);
+	nng::Matrix2d result2(eig_value.toDiagonal()*eig_vector);
+	result1.print();
+	result2.print();
+}
+int main(int argc, char **argv) {
+  //testMatrix2d();
+  //testCnnVector();
+  //testStandardNormalDistrubutionGenerator();
+  testEigenValueEigenVector();
+
   return 0;
 }
