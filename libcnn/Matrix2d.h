@@ -53,7 +53,11 @@ namespace nng{
 		Matrix2d abs();
 		Matrix2d floor();
         nng::Vector argmax(size_t axis);
-
+        bool isUpperTriangle(double eps); // is the sum of absolute value of left bottom corner elements < eps then is upper right triangle matrix
+        bool isLowerTriangle(double eps);
+        bool isDiagonal(double eps);
+        Vector getDiagonal();
+        
         // Matrix/scalar operations
         Matrix2d operator+(const double& rhs);
         Matrix2d operator-(const double& rhs);
@@ -71,10 +75,10 @@ namespace nng{
         const double& operator()(const size_t& row, const size_t& col) const;
 
         // Access the row and column sizes
-        size_t get_rows() const {return rows;}
-        size_t get_cols() const {return cols;}
+        size_t get_rows() const {return _rows;}
+        size_t get_cols() const {return _cols;}
         Vectord get_col(size_t index = 0);
-		Vectord get_row(size_t index = 0) {return mat[index];}
+		Vectord get_row(size_t index = 0) {return _mat[index];}
         void set_col(const Vectord& v, size_t index);
 		void set_col(const nng::Vector& v, size_t index);
         void setElement(double value, const size_t& row, const size_t& col);
@@ -82,9 +86,9 @@ namespace nng{
         void print();
 
     private:
-        size_t rows;
-        size_t cols;
-        std::vector<Vectord> mat;
+        size_t _rows;
+        size_t _cols;
+        std::vector<Vectord> _mat;
 
     };
 	

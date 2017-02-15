@@ -1,5 +1,6 @@
 #include "nng_math_eig.h"
 #include "nng_math.h"
+#include "Matrix2d.h"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
@@ -9,12 +10,11 @@
 
 const double epsilon = 0.000001;
 
-//nng::pair_eigen_value_eigenvector nng::compute_eigenvalue_eigenvector_QR(const Matrix2d& m)
-
-nng::EigenValueEigenVector::EigenValueEigenVector(const nng::Matrix2d& m)
+nng::EigenValueEigenVector::EigenValueEigenVector(const nng::Matrix2d& A):
+_A(A)
 {
-    _v_pk.resize(m.get_cols()-1);
-	compute_Pk(m);
+    _v_pk.resize(A.get_cols()-1);
+	
 }
 
 nng::EigenValueEigenVector::~EigenValueEigenVector()
@@ -23,10 +23,47 @@ nng::EigenValueEigenVector::~EigenValueEigenVector()
    {
      delete (*it);
    } 
-    
 }
 
-std::vector<nng::Matrix2d*> nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
+
+nng::pair_eigenvalue_eigenvector nng::EigenValueEigenVector::compute_eigenvalue_eigenvector_QR(Matrix2d& A)
+{
+    size_t n = A.get_cols();
+    nng::Vector eigen_value(n);
+    nng::Matrix2d eigen_vector(n,n);
+    if (compute_QR(A))
+        eigen_value = _A.getDiagonal();
+    return std::make_pair(eigen_value,eigen_vector);
+}
+
+bool nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
+{
+    compute_Pk(A);
+    
+    // Q_transpose = P_{n-2} P_{n-1} ... P_0
+    // Q = P_0^T P_1^T ... P_{n-2}^T
+
+    if (_v_pk[0])
+    {
+       size_t n = _v_pk[0]->get_cols();
+       nng::Matrix2d Q_transpose = nng::Identity(n);
+       for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
+       {
+  
+         Q_transpose = (**it)*Q_transpose;
+       }
+       //nng::Matrix2d Q = Q_transpose.transpose();
+       //nng::Matrix2d R = Q_transpose()*A;
+       //_A = R*Q; //Q^T A=R
+       _A = Q_transpose*A*Q_transpose.transpose();
+       
+       if (not _A.isUpperTriangle(1e-3))
+           return compute_QR(_A);
+    }
+    return false;
+}
+
+void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 {
 	size_t n = A.get_cols();
 	nng::Vector col_k(n);
@@ -63,7 +100,7 @@ std::vector<nng::Matrix2d*> nng::EigenValueEigenVector::compute_Pk(const nng::Ma
 		
         _v_pk[k] = new nng::Matrix2d(Pk);
 	}
-    return _v_pk;
+
 }
 
 //d=[d1,d2,...,dk,...dn]
