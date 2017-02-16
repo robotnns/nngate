@@ -15,7 +15,10 @@ _A(A)
 ,_S(nng::Identity(A.get_cols()))
 ,_eig(std::make_pair(_A.getDiagonal(),_S))
 {
-    _v_pk.resize(A.get_cols()-1);
+    size_t n = A.get_cols();
+    _v_pk.resize(n-1);
+    for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
+        *it = new nng::Matrix2d(n,n);
 	compute_eigenvalue_eigenvector_QR();
 }
 
@@ -46,7 +49,8 @@ void nng::EigenValueEigenVector::compute_eigenvalue_eigenvector_QR()
 
 bool nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 {
-	std::cout<<"compute_QR"<<std::endl;A.print();
+	std::cout<<"compute_QR"<<std::endl;
+    A.print();
     compute_Pk(A);
     
     // Q_transpose = P_{n-2} P_{n-1} ... P_0
@@ -69,7 +73,7 @@ bool nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 	   // S_1 = Q_1, S_k = S_{k-1}Q_k = Q_1 Q_2 ... Q_{k-1} Q_k, k>1
 	   _S = _S * Q;
 
-       if (not _A.isUpperTriangle(1e-3))
+       if (not _A.isUpperTriangle(1e-5))
            compute_QR(_A);
 	   else
 	   {
@@ -95,6 +99,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
     
 	for (size_t k = 0; k < n-1; ++k)
 	{
+        v = v*0.0;
 		// pull column k out of matrix P_{k-1}P_{k-2}...P_1A (just A if k=0)
 		col_k = nng::Vector(PA.get_col(k));
 		// normalize
@@ -102,8 +107,22 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 		//D = +-sqrt(d_k^2 + ... + d_{n-1}^2), choose + if dk<=0
 		D = compute_D(d,k);
 		// v_0v_1=...=v_{k-1}=0
+        if (std::abs(D)<nng::epsilon) 
+        {
+            if (D<0)
+                D=-nng::epsilon;
+            else
+                D=nng::epsilon;
+        };
 		v(k) = std::sqrt( 0.5 * ( 1.0 - d(k)/D) );
 		p = -D * v(k);
+        if (std::abs(p)<nng::epsilon) 
+        {
+            if (p<0)
+                p=-nng::epsilon;
+            else
+                p=nng::epsilon;
+        };
 		for (size_t j = k+1; j < n; ++j)
 		{
 			v(j) = d(j)/(2.0*p);
@@ -115,7 +134,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 		// for k+1, PA = P_{k}P_{k-1}...P_1A
         PA = Pk*PA;
 		
-        _v_pk[k] = new nng::Matrix2d(Pk);
+        *_v_pk[k] = Pk;
 	}
 
 }
@@ -124,7 +143,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 //return D = +-sqrt(d_k^2 + ... + d_{n-1}^2), choose + if d_k<=0
 double nng::EigenValueEigenVector::compute_D(const Vector& d, size_t k)
 {
-	assert (k >= 0 && k <= d.get_length()-1);
+	assert (k >= 0 && k < d.get_length());
 	double result = d.getTail(k).norm2();
 	if (d(k) > 0)
 		result = -result;

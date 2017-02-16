@@ -302,6 +302,7 @@ Vector Vector::normalize()
 {
   Vector result(length, 0.0);
   double sum = this->norm2();
+  if (sum<epsilon) sum = epsilon;
   for (size_t i=0; i<length; ++i) 
   {
       result(i) = vec[i]/sum;

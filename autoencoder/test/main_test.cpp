@@ -258,24 +258,33 @@ void testStandardNormalDistrubutionGenerator()
 
 void testEigenValueEigenVector()
 {
-	//nng::Matrix2d mat(2, 2);
-	//mat(0,0) = 2;
-	//mat(0,1) = 1;
-	//mat(1,0) = 1;
-	//mat(1,1) = 2;
-	nng::Matrix2d mat(3, 3);
-	mat(0,0) = 3;mat(0,1) = 0;mat(0,2) = 0;
-	mat(1,0) = 0;mat(1,1) = 1;mat(1,2) = 0;
-	mat(2,0) = 0;mat(2,1) = 0;mat(2,2) = 2;
+	nng::Matrix2d mat(2, 2);
+	mat(0,0) = 2;
+	mat(0,1) = 1;
+	mat(1,0) = 1;
+	mat(1,1) = 2;
+	// nng::Matrix2d mat(3, 3);
+	// mat(0,0) = 1;mat(0,1) = 0;mat(0,2) = 0;
+	// mat(1,0) = 0;mat(1,1) = 2;mat(1,2) = 0;
+	// mat(2,0) = 0;mat(2,1) = 0;mat(2,2) = 3;
 	nng::EigenValueEigenVector eig(mat);
 	nng::Vector eig_value(eig.getEigenValue());
 	nng::Matrix2d eig_vector(eig.getEigenVector());
 	eig_value.print();
 	eig_vector.print();
-	nng::Matrix2d result1(mat*eig_vector);
-	nng::Matrix2d result2(eig_value.toDiagonal()*eig_vector);
-	result1.print();
-	result2.print();
+    int n = mat.get_cols();
+	nng::Vector result1(n);
+	nng::Vector result2(n);
+    for(int i = 0; i < n;++i)
+    {
+        result1 = mat*eig_vector.get_col(i);
+        result2 = eig_vector.get_col(i);
+        result2 = result2*eig_value(i);
+        result1.print();
+        result2.print();
+    }
+
+
 }
 int main(int argc, char **argv) {
   //testMatrix2d();
