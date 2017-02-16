@@ -602,7 +602,7 @@ bool Matrix2d::isUpperTriangle(double eps)
             sum += std::abs(_mat[j][i]);
 			
 	}
-	std::cout<<sum<<std::endl;
+
     if (sum < eps)
         return true;
     else
@@ -638,7 +638,6 @@ nng::Vector Matrix2d::getDiagonal()
     for(size_t i = 0; i < _rows; ++i)
 	{
         result.push_back(_mat[i][i]);
-		std::cout<<_mat[i][i]<<std::endl;
 	}
     return nng::Vector(result);
 }
