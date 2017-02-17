@@ -1,4 +1,5 @@
 #include "nng_math.h"
+#include "nng_pca.h"
 #include "SparseAutoencoder.h"
 #include "SparseAutoencoderGrad.h"
 #include "Softmax.h"
@@ -7,6 +8,8 @@
 #include <pixdb.h>
 #include "dlib/optimization/optimization.h"
 #include <fstream>
+
+bool USE_WHITENING = true;
 
 std::vector<std::string> split(const std::string &s, char delim) {
     std::stringstream ss(s);
@@ -71,6 +74,11 @@ int main(int argc, char **argv)
 		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		data.set_col(m_patch.toVector(), m1 + i);
 	}
+    if (USE_WHITENING)
+    {
+        nng::PCA_ZCA zca(data,0.98,1e-5);
+        data = zca.getZcaWhite();
+    }
 	//std::cout<<"data="<<std::endl;
 	//data.print();
 	
@@ -78,9 +86,9 @@ int main(int argc, char **argv)
 	std::cout<<"input_size = "<<input_size<<std::endl;
 	nng::SparseAutoencoderGrad ae_grad(input_size, hidden_size, rho, lambda, beta, m,data);
 	
-	//nng::Vector opt_theta = autoencoder_compute_theta(ae,ae_grad, patch_size);
+	nng::Vector opt_theta = autoencoder_compute_theta(ae,ae_grad, patch_size);
 	
-	nng::Vector opt_theta = read_opt_theta_from_file("opt_theta.dat");
+	//nng::Vector opt_theta = read_opt_theta_from_file("opt_theta.dat");
 	
 	size_t m_train_1 = nb_image /4;
 	size_t m_train_2 = nb_image /4;
@@ -107,7 +115,11 @@ int main(int argc, char **argv)
 		train_labels(i + m_train_1) = 1;//v_image_in2[i].label;
 	}	
 
-
+    if (USE_WHITENING)
+    {
+        nng::PCA_ZCA zca_train(train_data,0.98,1e-5);
+        train_data = zca_train.getZcaWhite();
+    }
 	cout<<"prepare train data"<<endl;
 	nng::Matrix2d train_features = ae.sparse_autoencoder(opt_theta, hidden_size, input_size, train_data);
 	

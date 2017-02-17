@@ -53,19 +53,21 @@ namespace nng{
             Vector concatenate(const Vector& v);
             Vector kl_divergence(Vector& v);
             double sum();
+            double mean();
 			Vector power(const double exponent);
+            Vector sqrt();
 			double norm2();
 			Vector normalize();
 			Matrix2d toDiagonal();
 
-            void setLength(size_t len) {length = len;}
-            size_t get_length() const {return length;}
-            Vectord& getVector(){return vec;}
-            const Vectord& getVector() const {return vec;}
+            void setLength(size_t len) {_length = len;}
+            size_t get_length() const {return _length;}
+            Vectord& getVector(){return _vec;}
+            const Vectord& getVector() const {return _vec;}
 
         private:
-            Vectord vec;
-            size_t length;
+            Vectord _vec;
+            size_t _length;
     };
     
 }

@@ -1,12 +1,11 @@
 #include "nng_math_eig.h"
 #include "nng_math.h"
-#include "Matrix2d.h"
 #include <iostream>
-#include <assert.h>
-#include <math.h>
-#include <numeric>
-#include <algorithm>
-#include <random>
+//#include <assert.h>
+//#include <math.h>
+//#include <numeric>
+//#include <algorithm>
+//#include <random>
 
 const double epsilon = 0.000001;
 
@@ -15,11 +14,18 @@ _A(A)
 ,_S(nng::Identity(A.get_cols()))
 ,_eig(std::make_pair(_A.getDiagonal(),_S))
 {
+    std::cout<<"EigenValueEigenVector"<<std::endl;
     size_t n = A.get_cols();
-    _v_pk.resize(n-1);
-    for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
-        *it = new nng::Matrix2d(n,n);
-	compute_eigenvalue_eigenvector_QR();
+    std::cout<<"EigenValueEigenVector n="<<n<<std::endl;
+
+    _v_pk.reserve(n-1);
+    for (size_t i = 0; i < n-1; ++i)
+    {
+        std::cout<<"EigenValueEigenVector i="<<i<<std::endl;
+        _v_pk.push_back(new nng::Matrix2d(n,n));
+    }
+	std::cout<<"EigenValueEigenVector n="<<n<<std::endl;
+    compute_eigenvalue_eigenvector_QR();
 }
 
 nng::EigenValueEigenVector::~EigenValueEigenVector()
@@ -33,7 +39,7 @@ nng::EigenValueEigenVector::~EigenValueEigenVector()
 
 void nng::EigenValueEigenVector::compute_eigenvalue_eigenvector_QR()
 {
-
+std::cout<<"compute_eigenvalue_eigenvector_QR"<<std::endl;
     compute_QR(_A);
 
     _eig.first = _A.getDiagonal();
@@ -43,6 +49,7 @@ void nng::EigenValueEigenVector::compute_eigenvalue_eigenvector_QR()
 
 void nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 {
+    std::cout<<"compute_QR"<<std::endl;
     compute_Pk(A);
     
     // Q_transpose = P_{n-2} P_{n-1} ... P_0
@@ -69,6 +76,7 @@ void nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 
 void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 {
+        std::cout<<"compute_Pk"<<std::endl;
 	size_t n = A.get_cols();
 	nng::Vector col_k(n);
 	nng::Vector d(n);
@@ -126,6 +134,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 //return D = +-sqrt(d_k^2 + ... + d_{n-1}^2), choose + if d_k<=0
 double nng::EigenValueEigenVector::compute_D(const Vector& d, size_t k)
 {
+    std::cout<<"compute_D"<<std::endl;
 	assert (k >= 0 && k < d.get_length());
 	double result = d.getTail(k).norm2();
 	if (d(k) > 0)

@@ -12,34 +12,34 @@ using namespace std;
 
 Vector::Vector(size_t len)
 {
-    vec.resize(len);
-    length = len;
+    _vec.resize(len);
+    _length = len;
 }
 
 Vector::Vector(size_t len, const double& initial)
 {
-    vec.resize(len, initial);
-    length = len;
+    _vec.resize(len, initial);
+    _length = len;
 }
 
 
 Vector::Vector(const Vectord& v):
-vec(v)
+_vec(v)
 {
-    length = v.size();
+    _length = v.size();
 }
 
 Vector::Vector(const Vector& rhs) 
 {
-  vec = rhs.vec;
-  length = rhs.get_length();
+  _vec = rhs._vec;
+  _length = rhs.get_length();
 }
 
 Vector::Vector(Vector&& rhs)   
 {
-  vec = rhs.vec;
-  length = rhs.get_length();
-  rhs.vec.clear();
+  _vec = rhs._vec;
+  _length = rhs.get_length();
+  rhs._vec.clear();
 }
 
 Vector& Vector::operator=(Vector&& rhs)
@@ -47,10 +47,10 @@ Vector& Vector::operator=(Vector&& rhs)
 	if (this!=&rhs)
 	{
 		// pilfer other’s resource
-		vec = rhs.vec;
-		length = rhs.get_length();
+		_vec = rhs._vec;
+		_length = rhs.get_length();
 		// reset other
-		rhs.vec.clear();
+		rhs._vec.clear();
 	}
 	return *this;
 }
@@ -58,34 +58,34 @@ Vector& Vector::operator=(Vector&& rhs)
 // Access the individual elements
 double& Vector::operator()(const size_t& index)
 {
-    return vec[index];
+    return _vec[index];
 }
 
 const double& Vector::operator()(const size_t& index) const
 {
-    return vec[index];
+    return _vec[index];
 }
 
 double& Vector::operator[](const size_t& index)
 {
-    return vec[index];
+    return _vec[index];
 }
 
 const double& Vector::operator[](const size_t& index) const
 {
-    return vec[index];
+    return _vec[index];
 }
 
 //Vector/Vector addition
 Vector Vector::operator+(const Vector& rhs)
 {
   // check dimension
-  assert (length == rhs.get_length());
+  assert (_length == rhs.get_length());
 
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] + rhs(i);
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] + rhs(i);
   }
 
   return result;
@@ -96,12 +96,12 @@ Vector Vector::operator+(const Vector& rhs)
 Vector Vector::operator-(const Vector& rhs)
 {
   // check dimension
-  assert (length == rhs.get_length());
+  assert (_length == rhs.get_length());
 
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] - rhs(i);
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] - rhs(i);
   }
 
   return result;
@@ -112,12 +112,12 @@ Vector Vector::operator-(const Vector& rhs)
 Vector Vector::operator/(const Vector& rhs)
 {
   // check dimension
-  assert (length == rhs.get_length());
+  assert (_length == rhs.get_length());
 
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] / rhs(i);
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] / rhs(i);
   }
 
   return result;
@@ -129,13 +129,13 @@ Vector Vector::dot(const Vector& v)
 {
   // check dimension
   size_t len = v.get_length();
-  assert (length == len);
+  assert (_length == len);
 
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) 
+  for (size_t i=0; i<_length; ++i) 
   {
-      result(i) = vec[i]* v(i);
+      result(i) = _vec[i]* v(i);
   }
 
   return result;
@@ -145,10 +145,10 @@ Vector Vector::dot(const Vector& v)
 // Vector/scalar addition
 Vector Vector::operator+(const double& rhs) 
 {
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] + rhs;
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] + rhs;
   }
 
   return result;
@@ -157,10 +157,10 @@ Vector Vector::operator+(const double& rhs)
 // Vector/scalar subtraction
 Vector Vector::operator-(const double& rhs) 
 {
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] - rhs;
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] - rhs;
   }
 
   return result;
@@ -169,9 +169,9 @@ Vector Vector::operator-(const double& rhs)
 // unary - operator
 Vector Vector::operator-() const
 {
-  Vector result(length, 0.0);
-  for (size_t i=0; i<length; ++i) {
-      result(i) = -vec[i];
+  Vector result(_length, 0.0);
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = -_vec[i];
   }
 
   return result;
@@ -180,10 +180,10 @@ Vector Vector::operator-() const
 // Vector/scalar multiplication
 Vector Vector::operator*(const double& rhs) 
 {
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] * rhs;
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] * rhs;
   }
 
   return result;
@@ -193,10 +193,10 @@ Vector Vector::operator/(const double& rhs)
 {
   assert (std::abs(rhs) > epsilon);
 
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
 
-  for (size_t i=0; i<length; ++i) {
-      result(i) = vec[i] / rhs;
+  for (size_t i=0; i<_length; ++i) {
+      result(i) = _vec[i] / rhs;
   }
 
   return result;
@@ -204,19 +204,19 @@ Vector Vector::operator/(const double& rhs)
 
 void Vector::print()
 {
-  for (size_t i=0; i<vec.size(); i++)
-    std::cout<<vec[i]<<" ";
+  for (size_t i=0; i<_vec.size(); i++)
+    std::cout<<_vec[i]<<" ";
   std::cout<<std::endl;
 }
 
-// Get submatrix of length = len starting at start_index
+// Get submatrix of _length = len starting at start_index
 Vector Vector::getSegment(size_t start_index, size_t len) const
 {
-  assert (start_index < length && start_index + len <= length);
+  assert (start_index < _length && start_index + len <= _length);
   Vector result(len, 0.0);
 
   for (size_t i=0; i<len; ++i) {
-      result(i) = vec[start_index+i];
+      result(i) = _vec[start_index+i];
   }
 
   return result;
@@ -225,11 +225,11 @@ Vector Vector::getSegment(size_t start_index, size_t len) const
 // Get submatrix starting at start_index to the end
 Vector Vector::getTail(size_t start_index) const
 {
-  assert (start_index < length);
-  Vector result(length-start_index, 0.0);
+  assert (start_index < _length);
+  Vector result(_length-start_index, 0.0);
 
-  for (size_t i=start_index; i<length; ++i) {
-      result(i-start_index) = vec[i];
+  for (size_t i=start_index; i<_length; ++i) {
+      result(i-start_index) = _vec[i];
   }
 
   return result;
@@ -238,7 +238,7 @@ Vector Vector::getTail(size_t start_index) const
 void Vector::setSegment(size_t start_index, size_t len, const Vector& v)
 {
   for (size_t i=0; i<len; ++i) {
-      vec[start_index+i] = v(i);
+      _vec[start_index+i] = v(i);
   }
 }
 
@@ -247,7 +247,7 @@ Vector Vector::concatenate(const Vectord& v)
 {
     Vector result(*this);
     result.getVector().insert(result.getVector().end(),v.begin(), v.end());
-    result.setLength(length + v.size());
+    result.setLength(_length + v.size());
     return result;
 }
 
@@ -255,19 +255,19 @@ Vector Vector::concatenate(const Vector& v)
 {
     Vector result(*this);
     result.getVector().insert(result.getVector().end(),v.getVector().begin(), v.getVector().end());
-    result.setLength(length + v.get_length());
+    result.setLength(_length + v.get_length());
     return result;
 }
 
 // kl divergence between each element in the current vector and v
 Vector Vector::kl_divergence(Vector& v)
 {
-    assert (length == v.get_length());
+    assert (_length == v.get_length());
     Vector result(*this);
     //double sum_vec = sum();
     //double sum_v = v.sum();
-    for (size_t i=0; i<length; ++i) {
-        result(i) = nng::kl_divergence(vec[i], v(i));
+    for (size_t i=0; i<_length; ++i) {
+        result(i) = nng::kl_divergence(_vec[i], v(i));
     }
     return result;
 }
@@ -275,16 +275,33 @@ Vector Vector::kl_divergence(Vector& v)
 // sum of all the elements in the vector
 double Vector::sum()
 {
-    return std::accumulate(vec.begin(), vec.end(), 0.0);
+    return std::accumulate(_vec.begin(), _vec.end(), 0.0);
+}
+
+// average of all the elements in the vector
+double Vector::mean()
+{
+    return this->sum()/_length;
 }
 
 // power at each element
 Vector Vector::power(const double exponent)
 {
   Vector result(*this);
-  for (size_t i=0; i<length; ++i) 
+  for (size_t i=0; i<_length; ++i) 
   {
-      result(i) = pow(vec[i], exponent);
+      result(i) = pow(_vec[i], exponent);
+  }
+  return result;
+}
+
+// sqrt at each element
+Vector Vector::sqrt()
+{
+  Vector result(*this);
+  for (size_t i=0; i<_length; ++i) 
+  {
+      result(i) = std::sqrt(_vec[i]);
   }
   return result;
 }
@@ -300,20 +317,20 @@ double Vector::norm2()
 // normalize the vector
 Vector Vector::normalize()
 {
-  Vector result(length, 0.0);
+  Vector result(_length, 0.0);
   double sum = this->norm2();
   if (sum<epsilon) sum = epsilon;
-  for (size_t i=0; i<length; ++i) 
+  for (size_t i=0; i<_length; ++i) 
   {
-      result(i) = vec[i]/sum;
+      result(i) = _vec[i]/sum;
   }
   return result;	
 }
 
 Matrix2d Vector::toDiagonal()
 {
-	Matrix2d result(length, length);
-	for (size_t i=0; i<length; ++i)
-		result(i,i) = vec[i];
+	Matrix2d result(_length, _length);
+	for (size_t i=0; i<_length; ++i)
+		result(i,i) = _vec[i];
 	return result;
 }
