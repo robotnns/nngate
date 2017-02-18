@@ -258,15 +258,15 @@ void testStandardNormalDistrubutionGenerator()
 
 void testEigenValueEigenVector()
 {
-	nng::Matrix2d mat(2, 2);
-	mat(0,0) = 2;
-	mat(0,1) = 1;
-	mat(1,0) = 1;
-	mat(1,1) = 2;
-	// nng::Matrix2d mat(3, 3);
-	// mat(0,0) = 1;mat(0,1) = 0;mat(0,2) = 0;
-	// mat(1,0) = 0;mat(1,1) = 2;mat(1,2) = 0;
-	// mat(2,0) = 0;mat(2,1) = 0;mat(2,2) = 3;
+//	nng::Matrix2d mat(2, 2);
+//	mat(0,0) = 2;
+//	mat(0,1) = 1;
+//	mat(1,0) = 1;
+//	mat(1,1) = 2;
+	nng::Matrix2d mat(3, 3);
+	mat(0,0) = 1;mat(0,1) = 0;mat(0,2) = 0;
+	mat(1,0) = 0;mat(1,1) = 2;mat(1,2) = 0;
+	mat(2,0) = 0;mat(2,1) = 0;mat(2,2) = 3;
 	nng::EigenValueEigenVector eig(mat);
 	nng::Vector eig_value(eig.getEigenValue());
 	nng::Matrix2d eig_vector(eig.getEigenVector());

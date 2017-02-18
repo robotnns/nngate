@@ -13,33 +13,21 @@ nng::EigenValueEigenVector::EigenValueEigenVector(const nng::Matrix2d& A):
 _A(A)
 ,_S(nng::Identity(A.get_cols()))
 ,_eig(std::make_pair(_A.getDiagonal(),_S))
+,_Q_transpose(nng::Identity(A.get_cols()))
 {
     std::cout<<"EigenValueEigenVector"<<std::endl;
-    size_t n = A.get_cols();
-    std::cout<<"EigenValueEigenVector n="<<n<<std::endl;
 
-    _v_pk.reserve(n-1);
-    for (size_t i = 0; i < n-1; ++i)
-    {
-        std::cout<<"EigenValueEigenVector i="<<i<<std::endl;
-        _v_pk.push_back(new nng::Matrix2d(n,n));
-    }
-	std::cout<<"EigenValueEigenVector n="<<n<<std::endl;
     compute_eigenvalue_eigenvector_QR();
 }
 
 nng::EigenValueEigenVector::~EigenValueEigenVector()
 {
-   for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
-   {
-     delete (*it);
-   } 
 }
 
 
 void nng::EigenValueEigenVector::compute_eigenvalue_eigenvector_QR()
 {
-std::cout<<"compute_eigenvalue_eigenvector_QR"<<std::endl;
+std::cout<<"EigenValueEigenVector 1"<<std::endl;
     compute_QR(_A);
 
     _eig.first = _A.getDiagonal();
@@ -49,23 +37,15 @@ std::cout<<"compute_eigenvalue_eigenvector_QR"<<std::endl;
 
 void nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 {
-    std::cout<<"compute_QR"<<std::endl;
+std::cout<<"EigenValueEigenVector 2"<<std::endl;
     compute_Pk(A);
     
     // Q_transpose = P_{n-2} P_{n-1} ... P_0
     // Q = P_0^T P_1^T ... P_{n-2}^T
 
-   size_t n = _v_pk[0]->get_cols();
-   nng::Matrix2d Q_transpose = nng::Identity(n);
-   for (std::vector< nng::Matrix2d* >::iterator it = _v_pk.begin() ; it != _v_pk.end(); ++it)
-   {
-
-     Q_transpose = (**it)*Q_transpose;
-   }
-   nng::Matrix2d Q = Q_transpose.transpose();
-   nng::Matrix2d R = Q_transpose*A;//Q^T A=R
-   _A = R*Q; //A_k = Q_k R_k, A_{k+1} = R_k Q_k
-   //_A = Q_transpose*A*Q_transpose.transpose();
+   nng::Matrix2d Q = _Q_transpose.transpose();
+   nng::Matrix2d R = _Q_transpose*A;//Q^T A=R
+   _A = R*Q; //A_k = Q_k R_k, A_{k+1} = R_k Q_k  //_A = Q_transpose*A*Q_transpose.transpose();
    
    // S_1 = Q_1, S_k = S_{k-1}Q_k = Q_1 Q_2 ... Q_{k-1} Q_k, k>1
    _S = _S * Q;
@@ -76,7 +56,7 @@ void nng::EigenValueEigenVector::compute_QR(Matrix2d& A)
 
 void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 {
-        std::cout<<"compute_Pk"<<std::endl;
+ std::cout<<"EigenValueEigenVector 3"<<std::endl;
 	size_t n = A.get_cols();
 	nng::Vector col_k(n);
 	nng::Vector d(n);
@@ -125,7 +105,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 		// for k+1, PA = P_{k}P_{k-1}...P_1A
         PA = Pk*PA;
 		
-        *_v_pk[k] = Pk;
+		_Q_transpose = Pk*_Q_transpose;
 	}
 
 }
@@ -134,7 +114,7 @@ void nng::EigenValueEigenVector::compute_Pk(const nng::Matrix2d& A)
 //return D = +-sqrt(d_k^2 + ... + d_{n-1}^2), choose + if d_k<=0
 double nng::EigenValueEigenVector::compute_D(const Vector& d, size_t k)
 {
-    std::cout<<"compute_D"<<std::endl;
+
 	assert (k >= 0 && k < d.get_length());
 	double result = d.getTail(k).norm2();
 	if (d(k) > 0)
