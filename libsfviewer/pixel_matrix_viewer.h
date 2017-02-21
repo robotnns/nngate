@@ -1,5 +1,5 @@
-#ifndef PIX_DB_H
-#define PIX_DB_H
+#ifndef PIX_MATIRX_VIEWER_H
+#define PIX_MATIRX_VIEWER_H
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>

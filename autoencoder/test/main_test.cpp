@@ -4,7 +4,7 @@
 #include <vector>
 #include "nng_pca.h"
 #include <pixdb.h>
-#include "pixel_matrix_viewer.h"
+#include <pixel_matrix_viewer.h>
 
 using namespace std;
 
