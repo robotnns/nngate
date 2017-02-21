@@ -47,11 +47,11 @@ double nng::kl_divergence(const double x, const double y)
   return x * log(x / y) + (1 - x) * log((1 - x) / (1 - y));
 }
 
-nng::Matrix2d operator+(double scalar, nng::Matrix2d& matrix) 
+nng::Matrix2d nng::operator+(double scalar, nng::Matrix2d& matrix) 
 {
     return matrix + scalar;
 }
-nng::Matrix2d operator-(double scalar, nng::Matrix2d& matrix) 
+nng::Matrix2d nng::operator-(double scalar, nng::Matrix2d& matrix) 
 {
     size_t rows = matrix.get_rows();
     size_t cols = matrix.get_cols();
@@ -59,25 +59,32 @@ nng::Matrix2d operator-(double scalar, nng::Matrix2d& matrix)
     return m_scalar - matrix;
 }
 
-nng::Matrix2d operator*(double scalar, nng::Matrix2d& matrix) 
+nng::Matrix2d nng::operator*(double scalar, nng::Matrix2d& matrix) 
 {
     return matrix * scalar;
 }
 
-nng::Vector operator+(double scalar, nng::Vector& v) 
+nng::Vector nng::operator+(double scalar, nng::Vector& v) 
 {
     return v + scalar;
 }
-nng::Vector operator-(double scalar, nng::Vector& v) 
+nng::Vector nng::operator-(double scalar, nng::Vector& v) 
 {
     size_t len = v.get_length();
     nng::Vector v_scalar(len,scalar);
     return v_scalar - v;
 }
 
-nng::Vector operator*(double scalar, nng::Vector& v) 
+nng::Vector nng::operator*(double scalar, nng::Vector& v) 
 {
     return v * scalar;
+}
+
+nng::Vector nng::operator/(double scalar, nng::Vector& v) 
+{
+    size_t len = v.get_length();
+    nng::Vector v_scalar(len,scalar);
+    return v_scalar / v;
 }
 
 nng::Vector nng::column_vector_to_cnn_vector(const nng::column_vector& x)

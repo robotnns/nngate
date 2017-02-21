@@ -74,14 +74,14 @@ int main(int argc, char **argv)
 	nng::Matrix2d train_images(input_size,m,1);
 	nng::Vector train_labels(m,0.0);
 	size_t i_start_x, i_start_y;
-	nng::Matrix2d* m_image;
+	nng::Matrix2d* m_image(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT);
 	nng::Matrix2d m_patch(patch_size, patch_size,0);
 	for (size_t i = 0; i < m_train_1; i++)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
 		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_images.set_col(m_patch.toVector(), i);
 		train_labels(i) = 0;
 	}
@@ -89,8 +89,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
 		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
-		m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+		m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_images.set_col(m_patch.toVector(), m_train_1 + i);
 		train_labels(i+ m_train_1) = 1;
 	}
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
 		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i + m_train_1].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i + m_train_1].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i);
 		test_labels(i) = 0;
 	}
@@ -116,8 +116,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
 		i_start_y = (size_t)(nng::rand_a_b(margin, 1.0*(IMG_WIDTH_HEIGHT - patch_size-margin)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i + m_train_2].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i + m_train_2].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i + m_test_1);
 		test_labels(i + m_test_1) = 1;
 	}

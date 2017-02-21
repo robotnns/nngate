@@ -47,7 +47,7 @@ namespace nng
 	param_config stack2params(se_stack_grad& stack_grad);
 	se_stack params2stack(param_config& param_net_config);
 	
-}
+
     
     nng::Matrix2d operator+(double scalar, nng::Matrix2d& matrix);
     nng::Matrix2d operator-(double scalar, nng::Matrix2d& matrix);
@@ -55,5 +55,6 @@ namespace nng
     nng::Vector operator+(double scalar, nng::Vector& v);
     nng::Vector operator-(double scalar, nng::Vector& v);
     nng::Vector operator*(double scalar, nng::Vector& v);
-
+    nng::Vector operator/(double scalar, nng::Vector& v);
+}
 #endif

@@ -41,42 +41,46 @@ int main(int argc, char **argv)
 	
 	size_t nb_image = v_image_in.size();
 	size_t nb_image2 = v_image_in2.size();
-	
+	std::cout<<"nb_image = "<<nb_image<<std::endl;
+    std::cout<<"nb_image2 = "<<nb_image2<<std::endl;
+    
 	size_t patch_size = 28;//28
     size_t input_size = patch_size*patch_size;
     size_t hidden_size = 196;//196;
     double rho = 0.1;
     double lambda = 0.003;
     double beta = 3;
-    size_t m1 = nb_image / 2;
-	size_t m2 = nb_image2 / 2;
+    size_t m1 = nb_image;//nb_image / 2;
+	size_t m2 = nb_image2;//nb_image2 / 2;
 	size_t m = m1 + m2;
 	std::cout<<"sample number = "<<m<<std::endl;
 	
 
 	nng::Matrix2d data(input_size,m,1);
 	size_t i_start_x, i_start_y;
-	nng::Matrix2d* m_image;
+	nng::Matrix2d m_image(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT);
 	nng::Matrix2d m_patch(patch_size, patch_size,0);
 	for (size_t i = 0; i < m1; i++)
 	{
+
 		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
 		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		data.set_col(m_patch.toVector(), i);
 	}
 	for (size_t i = 0; i < m2; i++)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
 		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-		m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+		m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		data.set_col(m_patch.toVector(), m1 + i);
 	}
     if (USE_WHITENING)
     {
-        nng::PCA_ZCA zca(data,0.98,1e-5);
+        std::cout<<"USE_WHITENING"<<std::endl;
+        nng::PCA_ZCA zca(data,0.99,0.1);
         data = zca.getZcaWhite();
     }
 	//std::cout<<"data="<<std::endl;
@@ -90,8 +94,8 @@ int main(int argc, char **argv)
 	
 	//nng::Vector opt_theta = read_opt_theta_from_file("opt_theta.dat");
 	
-	size_t m_train_1 = nb_image /4;
-	size_t m_train_2 = nb_image /4;
+	size_t m_train_1 = nb_image;//nb_image /4;
+	size_t m_train_2 = nb_image;//nb_image /4;
 	size_t m_train = m_train_1 + m_train_2;
     nng::Matrix2d train_data(input_size,m_train,1);
 	nng::Vector train_labels(m_train,0.0);
@@ -99,8 +103,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
 		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_data.set_col(m_patch.toVector(), i);
 		train_labels(i) = 0;//v_image_in[i].label;
 	}
@@ -109,22 +113,22 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
 		i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		train_data.set_col(m_patch.toVector(), i + m_train_1);
 		train_labels(i + m_train_1) = 1;//v_image_in2[i].label;
 	}	
 
     if (USE_WHITENING)
     {
-        nng::PCA_ZCA zca_train(train_data,0.98,1e-5);
+        nng::PCA_ZCA zca_train(train_data,0.99,0.1);
         train_data = zca_train.getZcaWhite();
     }
 	cout<<"prepare train data"<<endl;
 	nng::Matrix2d train_features = ae.sparse_autoencoder(opt_theta, hidden_size, input_size, train_data);
 	
-	size_t m_test_1 = nb_image /10;
-	size_t m_test_2 = nb_image /10;
+	size_t m_test_1 = nb_image;//nb_image /10;
+	size_t m_test_2 = nb_image;//nb_image /10;
 	size_t m_test = m_test_1 + m_test_2;
 	
     nng::Matrix2d test_data(input_size,m_test,1);
@@ -133,8 +137,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
 		i_start_y = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i + m_train_1].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[i + m_train_1].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i);
 		test_labels(i) = 0;
 	}
@@ -143,8 +147,8 @@ int main(int argc, char **argv)
 	{
 		i_start_x = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
 		i_start_y = (size_t)(nng::rand_a_b(50.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-50.0)));
-        m_image = new nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i + m_train_2].pix_buf);
-		m_patch = m_image->getBlock(i_start_x, i_start_y, patch_size, patch_size);
+        m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in2[i + m_train_2].pix_buf);
+		m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
 		test_data.set_col(m_patch.toVector(), i + m_test_1);
 		test_labels(i + m_test_1) = 1;
 	}	
