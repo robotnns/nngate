@@ -20,6 +20,7 @@ namespace nng
             ~EigenValueEigenVector();
             
             void compute_eigenvalue_eigenvector_QR();
+            void compute_eigenvalue_eigenvector_dlib();
             void compute_QR(Matrix2d& A);
             void compute_Pk(const Matrix2d& A); // compute householder matrices
             double compute_D(const Vector& d, size_t k);
