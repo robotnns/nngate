@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	std::cout<<"sample number = "<<m<<std::endl;
 	
 
-	nng::Matrix2d data(input_size,m,1);
+	nng::Matrix2d data(input_size,m);
 	size_t i_start_x, i_start_y;
 	nng::Matrix2d m_image(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT);
 	nng::Matrix2d m_patch(patch_size, patch_size,0);

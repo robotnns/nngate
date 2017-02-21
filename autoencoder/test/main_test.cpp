@@ -2,6 +2,10 @@
 #include "nng_math_eig.h"
 #include <iostream>
 #include <vector>
+#include "nng_pca.h"
+#include <pixdb.h>
+#include "pixel_matrix_viewer.h"
+
 using namespace std;
 
 void testMatrix2d()
@@ -286,11 +290,49 @@ void testEigenValueEigenVector()
 
 
 }
+
+void testPcaZca()
+{
+	std::vector <STRU_PIXDB_REC_DOUBLE> v_image_in;
+	pixdb pdb;
+	pdb.set_file_name("../../data/G.pdb");	
+	pdb.read_all(v_image_in);
+    size_t patch_size = 28;
+    size_t input_size = patch_size*patch_size;
+    nng::Matrix2d data(input_size,1);
+    nng::Matrix2d data_white(input_size,1);
+	size_t i_start_x, i_start_y;
+	nng::Matrix2d m_image(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT);
+	nng::Matrix2d m_patch(patch_size, patch_size,0);
+	i_start_x = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
+	i_start_y = (size_t)(nng::rand_a_b(40.0, 1.0*(IMG_WIDTH_HEIGHT - patch_size-40.0)));
+    m_image = nng::Matrix2d(IMG_WIDTH_HEIGHT, IMG_WIDTH_HEIGHT, v_image_in[0].pix_buf);
+	m_patch = m_image.getBlock(i_start_x, i_start_y, patch_size, patch_size);
+	data.set_col(m_patch.toVector(), 0);
+    
+    nng::PCA_ZCA zca(data,0.99,0.1);
+    data_white = zca.getZcaWhite();
+    
+    std::vector<double> raw_image = data.get_col(0);
+    std::vector<double> zca_white_image = data_white.get_col(0);
+    
+	PixelMatrixViewer pxv;
+	pxv.init(1000,1000,false);
+
+	float scale = 4.0;
+    pxv.add_vec(IMG_WIDTH_HEIGHT,IMG_WIDTH_HEIGHT,0,0,&raw_image,scale);
+    pxv.add_vec(IMG_WIDTH_HEIGHT,IMG_WIDTH_HEIGHT,IMG_WIDTH_HEIGHT*scale,0,&zca_white_image,scale);
+	
+	pxv.render();	
+	pxv.save_image(0);
+	sleep(100);
+}
+
 int main(int argc, char **argv) {
   //testMatrix2d();
   //testCnnVector();
   //testStandardNormalDistrubutionGenerator();
-  testEigenValueEigenVector();
-
+  //testEigenValueEigenVector();
+  testPcaZca();
   return 0;
 }
