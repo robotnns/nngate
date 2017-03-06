@@ -76,7 +76,7 @@ namespace nng{
         // Access the individual elements
         double& operator()(const size_t& row, const size_t& col);
         const double& operator()(const size_t& row, const size_t& col) const;
-
+		
         // Access the row and column sizes
         size_t get_rows() const {return _rows;}
         size_t get_cols() const {return _cols;}

@@ -5,641 +5,119 @@
 #include <numeric>
 #include <algorithm>
 #include <random>
-#include "Vector.h"
 #include "nng_math.h"
 
 using namespace nng;
 using namespace std;
 
-Matrix2d::Matrix2d(size_t r, size_t c) 
+Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4) 
 {
-  _mat.resize(r);
-  for (size_t i=0; i<_mat.size(); ++i) {
-    _mat[i].resize(c);
+  _mat.resize(s1);
+  for (size_t i=0; i<_mat.size(); ++i) 
+  {
+    _mat[i].resize(s2);
+	for (size_t j = 0; j < s2; ++j)
+	{
+	  _mat[i][j] = Matrix2d(s3, s4);
+	}
+		
   }
-  _rows = r;
-  _cols = c;
+  
+  _shape.resize(4);
+  _shape[0] = s1;
+  _shape[1] = s2;
+  _shape[2] = s3;
+  _shape[3] = s4;
 }
 
-Matrix2d::Matrix2d(size_t r, size_t c, const double& initial) 
+Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const double& initial) 
 {
-  _mat.resize(r);
-  for (size_t i=0; i<_mat.size(); ++i) {
-    _mat[i].resize(c, initial);
+  _mat.resize(s1);
+  for (size_t i=0; i<_mat.size(); ++i) 
+  {
+    _mat[i].resize(s2);
+	for (size_t j = 0; j < s2; ++j)
+	{
+	  _mat[i][j] = Matrix2d(s3, s4, initial);
+	}
+		
   }
-  _rows = r;
-  _cols = c;
+  
+  _shape.resize(4);
+  _shape[0] = s1;
+  _shape[1] = s2;
+  _shape[2] = s3;
+  _shape[3] = s4;
 }
 
 // Conversiont from vector to matrix, row major
-Matrix2d::Matrix2d(size_t r, size_t c, const Vectord& v)
+Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const Vectord& vec)
 {
-  assert (v.size() == r*c);
-  _mat.resize(r);
-  for (size_t i = 0; i <= v.size() - c ; i += c){
-    Vectord::const_iterator first = v.begin() + i;
-    Vectord::const_iterator last = v.begin() + i + c;
-    _mat[i/c].assign(first, last);
-  }
-  _rows = r;
-  _cols = c;
+  assert (vec.size() == s1*s2*s3*s4);
+  nng::Vector v(vec);
+  Matrix4d(s1, s2, s3, s4, v);
 }
 
-Matrix2d::Matrix2d(size_t r, size_t c, const nng::Vector& cnnv)
+Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector& v)
 {
-  Vectord v = cnnv.getVector();
-  assert (v.size() == r*c);
-  _mat.resize(r);
-  for (size_t i = 0; i <= v.size() - c ; i += c){
-    Vectord::const_iterator first = v.begin() + i;
-    Vectord::const_iterator last = v.begin() + i + c;
-    _mat[i/c].assign(first, last);
+  assert (v.get_length() == s1*s2*s3*s4);
+  _mat.resize(s1);
+  Matrix2d m(s3, s4);
+  for (size_t i=0; i<_mat.size(); ++i) 
+  {
+    _mat[i].resize(s2);
+	for (size_t j = 0; j < s2; ++j)
+	{
+	  m = Matrix2d(s3,s4,v.getSegment(i*s2*s3*s4 + j*s3*s4,s3*s4));
+	  _mat[i][j] = m;
+	}
   }
-  _rows = r;
-  _cols = c;
+
+  _shape.resize(4);
+  _shape[0] = s1;
+  _shape[1] = s2;
+  _shape[2] = s3;
+  _shape[3] = s4;
 }
 
-Matrix2d::Matrix2d(const Matrix2d& rhs) 
+Matrix2d::Matrix4d(const Matrix4d& rhs) 
 {
   _mat = rhs._mat;
-  _rows = rhs.get_rows();
-  _cols = rhs.get_cols();
+  _shape = rhs.shape();
 }
 
-Matrix2d::Matrix2d(Matrix2d&& rhs)   
+Matrix4d::Matrix4d(Matrix4d&& rhs)   
 {
   _mat = rhs._mat;
-  _rows = rhs.get_rows();
-  _cols = rhs.get_cols();
+  _shape = rhs.shape();
   rhs._mat.clear();
 }
 
-Matrix2d& Matrix2d::operator=(Matrix2d&& rhs)
+Matrix4d& Matrix4d::operator=(Matrix4d&& rhs)
 {
 	if (this!=&rhs)
 	{
 		// pilfer other’s resource
 		_mat = rhs._mat;
-		_rows = rhs.get_rows();
-		_cols = rhs.get_cols();
+		_shape = rhs.shape();
 		// reset other
 		rhs._mat.clear();
 	}
 	return *this;
 }
 
-Matrix2d::~Matrix2d() {}
+Matrix4d::~Matrix4d() {}
 
 // Assignment Operator
-Matrix2d& Matrix2d::operator=(const Matrix2d& rhs) 
+Matrix4d& Matrix4d::operator=(const Matrix4d& rhs) 
 {
-  if (&rhs == this)
-    return *this;
-
-  size_t new_rows = rhs.get_rows();
-  size_t new_cols = rhs.get_cols();
-
-  _mat.resize(new_rows);
-  for (size_t i=0; i<_mat.size(); ++i) 
-  {
-    _mat[i].resize(new_cols);
-  }
-
-  for (size_t i=0; i<new_rows; ++i) 
-  {
-    for (size_t j=0; j<new_cols; ++j) 
+	if (this!=&rhs)
 	{
-      _mat[i][j] = rhs(i, j);
-    }
-  }
-  _rows = new_rows;
-  _cols = new_cols;
-
-  return *this;
-}
-
-// Addition of two matrices
-Matrix2d Matrix2d::operator+(const Matrix2d& rhs) 
-{
-  // check dimension
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_rows == rhs_rows && _cols == rhs_cols);
-
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] + rhs(i,j);
-    }
-  }
-
-  return result;
-}
-
-// Cumulative addition of this matrix and another
-Matrix2d& Matrix2d::operator+=(const Matrix2d& rhs) 
-{
-  // check dimension
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_rows == rhs_rows && _cols == rhs_cols);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      _mat[i][j] += rhs(i,j);
-    }
-  }
-
-  return *this;
-}
-
-
-// Subtraction of this matrix and another
-Matrix2d Matrix2d::operator-(Matrix2d& rhs) 
-{
-  // check dimension
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_rows == rhs_rows && _cols == rhs_cols);
-
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] - rhs(i,j);
-    }
-  }
-
-  return result;
-}
-
-Matrix2d Matrix2d::operator-(const Matrix2d& rhs) const
-{
-  // check dimension
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_rows == rhs_rows && _cols == rhs_cols);
-
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] - rhs(i,j);
-    }
-  }
-
-  return result;
-}
-
-// Cumulative subtraction of this matrix and another
-Matrix2d& Matrix2d::operator-=(const Matrix2d& rhs) 
-{
-  // check dimension
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_rows == rhs_rows && _cols == rhs_cols);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      _mat[i][j] -= rhs(i,j);
-    }
-  }
-
-  return *this;
-}
-
-
-// Left multiplication of this matrix and another
-Matrix2d Matrix2d::operator*(const Matrix2d& rhs) 
-{
-  size_t rhs_rows = rhs.get_rows();
-  size_t rhs_cols = rhs.get_cols();
-  assert (_cols == rhs_rows);
-
-  Matrix2d result(_rows, rhs_cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<rhs_cols; ++j) 
-	{
-      for (size_t k=0; k<_cols; k++) 
-	  {
-        result(i,j) += _mat[i][k] * rhs(k,j);
-      }
-    }
-  }
-
-  return result;
-}
-
-// Cumulative left multiplication of this matrix and another
-Matrix2d& Matrix2d::operator*=(const Matrix2d& rhs) 
-{
-  Matrix2d result = (*this) * rhs;
-  (*this) = result;
-  return *this;
-}
-
-// unary - operator
-Matrix2d Matrix2d::operator-() const
-{
-  Matrix2d result(_rows, _cols, 0.0);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = -_mat[i][j];
-    }
-  }
-
-  return result;
-}
-
-// Matrix/Matrix dot product
-Matrix2d Matrix2d::dot(const Matrix2d& m)
-{
-  // check dimension
-  size_t m_rows = m.get_rows();
-  size_t m_cols = m.get_cols();
-  assert (_rows == m_rows && _cols == m_cols);
-
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] * m(i,j);
-    }
-  }
-
-  return result;
-
-}
-
-// Calculate a transpose of this matrix
-
-Matrix2d Matrix2d::transpose() 
-{
-  Matrix2d result(_cols, _rows, 0.0);
-
-  for (size_t i=0; i<_cols; ++i) 
-  {
-    for (size_t j=0; j<_rows; ++j) 
-	{
-      result(i,j) = _mat[j][i];
-    }
-  }
-
-  return result;
-}
-
-const Matrix2d Matrix2d::transpose() const
-{
-  Matrix2d result(_cols, _rows, 0.0);
-
-  for (size_t i=0; i<_cols; ++i) 
-  {
-    for (size_t j=0; j<_rows; ++j) 
-	{
-      result(i,j) = _mat[j][i];
-    }
-  }
-
-  return result;
-}
-
-/*
-Matrix2d& Matrix2d::transpose()
-{
-  double temp = 0;
-  Vectord v = this->toVector();
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=i+1; j<_cols; ++j) 
-	{
-      	temp = v[i*_cols+j];
-	v[i*_cols+j] = v[j*_cols+i];
-        v[j*_cols+i] = temp;
-    }
-  }
-  int r_temp = _rows;
-  _rows = _cols;
-  _cols = r_temp;
-  _mat.resize(_rows);
-  for (size_t i = 0; i <= v.size() - _cols ; i += _cols)
-  {
-    Vectord::const_iterator first = v.begin() + i;
-    Vectord::const_iterator last = v.begin() + i + _cols;
-    _mat[i/_cols].assign(first, last);
- } 
- return *this;
-}
-*/
-// Get submatrix of size (r,c) starting at indices (i,j)
-Matrix2d Matrix2d::getBlock(size_t i, size_t j, size_t r, size_t c) const 
-{
-  Matrix2d result(r, c, 0.0);
-
-  for (size_t p=0; p<r; ++p) 
-  {
-      for (size_t q=0; q<c; ++q) 
-	  {
-          result(p,q) = _mat[i+p][j+q];
-      }
-  }
-
-  return result;
-}
-
-
-void Matrix2d::setBlock(size_t i, size_t j, size_t r, size_t c, const Matrix2d& m)
-{
-
-  for (size_t p=0; p<r; ++p) 
-  {
-      for (size_t q=0; q<c; ++q) 
-	  {
-          _mat[i+p][j+q] = m(p,q);
-      }
-  }
-}
-
-// Concatenation with matrix m
-// param: axis = 0 concatenate horizontally
-//        axis = 1 concatenate vertically
-Matrix2d Matrix2d::concatenate(const Matrix2d& m, size_t axis)
-{
-  assert (axis == 0 || axis == 1);
-  size_t m_rows = m.get_rows();
-  size_t m_cols = m.get_cols();
-
-  if (axis == 0)
-  {
-      assert (_rows == m_rows);
-
-      Matrix2d result(_rows, _cols + m_cols, 0.0);
-      result.setBlock(0,0,_rows,_cols, *this);
-      result.setBlock(0,_cols,_rows,m_cols, m);
-
-      return result;
-  }
-  else
-  {
-      assert (_cols == m_cols);
-
-      Matrix2d result(_rows + m_rows, _cols, 0.0);
-      result.setBlock(0,0,_rows,_cols, *this);
-      result.setBlock(_rows,0,m_rows,_cols, m);
-
-      return result;
-  }
-}
-
-// sigmoid at each element
-Matrix2d Matrix2d::sigmoid()
-{
-  Matrix2d result(*this);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = nng::sigmoid(_mat[i][j]);
-    }
-  }
-  return result;
-}
-
-// sum over _rows or columns
-nng::Vector Matrix2d::sum(size_t axis)
-{
-  assert (axis == 0 || axis == 1);
-  if (axis == 0) // sum over _rows for each column
-  {
-      nng::Vector result(_cols,0);
-      for (size_t j=0; j<_cols; ++j)
-          for (size_t i=0; i<_rows; ++i)
-              result(j) += _mat[i][j];
-      return result;
-  }
-  else // sum over _cols for each row
-  {
-      nng::Vector result(_rows,0);
-      for (size_t i=0; i<_rows; ++i) 
-	  {
-        for (size_t j=0; j<_cols; ++j) 
-		{
-          result(i) += _mat[i][j];
-        }
-      }
-      return result;
-  }
-}
-
-// sum over entire matrix
-double Matrix2d::sum()
-{
-  double result = 0;
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result += _mat[i][j];
-    }
-  }
-  return result;
-}
-
-// power at each element
-Matrix2d Matrix2d::power(const double exponent)
-{
-  Matrix2d result(*this);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = pow(_mat[i][j], exponent);
-    }
-  }
-  return result;
-}
-
-// derivation of sigmoid at each element
-Matrix2d Matrix2d::sigmoid_prime()
-{
-  Matrix2d result(*this);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = nng::sigmoid_prime(_mat[i][j]);
-    }
-  }
-  return result;
-}
-
-// max element
-double Matrix2d::max()
-{
-	Vectord v = toVector();
-	double max = *std::max_element(v.begin(), v.end());
-	return max;
-}
-
-// min element
-double Matrix2d::min()
-{
-	Vectord v = toVector();
-	double min = *std::min_element(v.begin(), v.end());
-	return min;
-}
-
-Matrix2d Matrix2d::exp()
-{
-  Matrix2d result(*this);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = std::exp((long double)_mat[i][j]);
-    }
-  }
-  return result;
-}
-
-Matrix2d Matrix2d::log()
-{
-  Matrix2d result(_rows, _cols, 0.0);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = std::log((long double)_mat[i][j]);
-    }
-  }
-  return result;
-}
-
-Matrix2d Matrix2d::abs()
-{
-  Matrix2d result(_rows, _cols, 0.0);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = std::abs((long double)_mat[i][j]);
-    }
-  }
-  return result;
-} 
-
-Matrix2d Matrix2d::floor()
-{
-  Matrix2d result(_rows, _cols, 0.0);
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = std::floor((long double)_mat[i][j]);
-    }
-  }
-  return result;
-} 
-
-nng::Vector Matrix2d::argmax(size_t axis)
-{
-	assert (axis == 0 || axis == 1);
-	if (axis == 0) // each element in result is argmax of the column vector of the matrix
-	{
-		nng::Vector result(_cols,0);
-		Vectord v;
-		size_t arg_max;
-		for (size_t i=0; i<_cols; ++i)
-		{
-			v = get_col(i);
-			arg_max = std::distance(v.begin(), std::max_element(v.begin(), v.end()));
-			result(i) = arg_max;
-		}
-		return result;
+		// pilfer other’s resource
+		_mat = rhs._mat;
+		_shape = rhs.shape();
 	}
-	else
-	{
-		nng::Vector result(_rows,0);
-		Vectord v;
-		size_t arg_max;
-		for (size_t i=0; i<_rows; ++i)
-		{
-			v = _mat[i];
-			arg_max = std::distance(v.begin(), std::max_element(v.begin(), v.end()));
-			result(i) = arg_max;
-		}
-		return result;
-	}
-}
-
-bool Matrix2d::isUpperTriangle(double eps)
-{
-    if (_cols != _rows || _cols < 1) 
-        return false;
-    if (_cols == 1) 
-        return true;
-
-    double sum = 0.0;
-    for(size_t i = 0; i < _cols; ++i)
-	{
-        for(size_t j=i+1; j<_rows; ++j)
-            sum += std::abs(_mat[j][i]);
-			
-	}
-
-    if (sum < eps)
-        return true;
-    else
-        return false;
-}
-
-bool Matrix2d::isLowerTriangle(double eps)
-{
-    if (_cols != _rows || _cols < 1) 
-        return false;
-    if (_rows == 1) 
-        return true;
-
-    double sum = 0.0;
-    for(size_t i = 1; i < _rows; ++i)
-        for(size_t j=i+1; j<_cols; ++j)
-            sum += std::abs(_mat[i][j]);
-    if (sum < eps)
-        return true;
-    else
-        return false;
-}
-
-bool Matrix2d::isDiagonal(double eps)
-{
-    return isUpperTriangle(eps) && isLowerTriangle(eps);
-}
-        
-nng::Vector Matrix2d::getDiagonal()
-{
-    assert(_cols == _rows);
-    Vectord result;
-    for(size_t i = 0; i < _rows; ++i)
-	{
-        result.push_back(_mat[i][i]);
-	}
-    return nng::Vector(result);
+	return *this;
 }
 
 Vectord Matrix2d::get_col(size_t index)

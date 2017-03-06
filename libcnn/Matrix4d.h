@@ -7,6 +7,7 @@
 
 #include "nng_type.h"
 #include "Vector.h"
+#include "Matrix3d.h"
 
 namespace nng{
 
@@ -17,7 +18,7 @@ namespace nng{
     public:
 		Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4);
         Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const double& initial);
-        Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const Vectord& v);
+        Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const Vectord& vec);
         Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector& v);
         Matrix4d(const Matrix4d& rhs);
 		Matrix4d(Matrix4d&& rhs);
@@ -29,19 +30,17 @@ namespace nng{
         double& operator()(const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4);
         const double& operator()(const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4) const;
 
-        // Access the row and column sizes
+
 		std::vector<size_t> shape const {return _shape;}
-        Vectord get_col(size_t index = 0);
-		Vectord get_row(size_t index = 0) {return _mat[index];}
-        void set_col(const Vectord& v, size_t index);
-		void set_col(const nng::Vector& v, size_t index);
-        void setElement(double value, const size_t& row, const size_t& col);
+		Matrix2d getMatrix2d(const size_t& index1, const size_t& index2){return _mat[index1][index2];}
+		void setMatrix2d(const nng::Matrix2d& m, const size_t& index1, const size_t& index2){_mat[index1][index2] = m;}
+        //void setElement(double value, const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4);
         
         void print();
 
     private:
         std::vector<size_t> _shape;
-        std::vector<std::vector<std::vector<Vectord>>> _mat;
+        std::vector<std::vector<Matrix2d>> _mat;
 
     };
 	
