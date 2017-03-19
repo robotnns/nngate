@@ -38,9 +38,9 @@ namespace nng
 
 	struct param_config
 	{
-		nng::Vector params; // vector of w_i b_i
+		Vector params; // vector of w_i b_i
 		se_net_config  net_config;
-		param_config(nng::Vector& params, se_net_config& net_config):params(params), net_config(net_config){};
+		param_config(Vector& params, se_net_config& net_config):params(params), net_config(net_config){};
 	};
 
 	param_config stack2params(se_stack& stack);

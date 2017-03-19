@@ -1,11 +1,8 @@
-#include "Matrix2d.h"
+#include "Matrix4d.h"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
-#include <numeric>
-#include <algorithm>
-#include <random>
-#include "nng_math.h"
+
 
 using namespace nng;
 using namespace std;
@@ -20,7 +17,6 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4)
 	{
 	  _mat[i][j] = Matrix2d(s3, s4);
 	}
-		
   }
   
   _shape.resize(4);
@@ -40,7 +36,6 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const double& ini
 	{
 	  _mat[i][j] = Matrix2d(s3, s4, initial);
 	}
-		
   }
   
   _shape.resize(4);
@@ -80,7 +75,7 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector
   _shape[3] = s4;
 }
 
-Matrix2d::Matrix4d(const Matrix4d& rhs) 
+Matrix4d::Matrix4d(const Matrix4d& rhs) 
 {
   _mat = rhs._mat;
   _shape = rhs.shape();
@@ -106,8 +101,6 @@ Matrix4d& Matrix4d::operator=(Matrix4d&& rhs)
 	return *this;
 }
 
-Matrix4d::~Matrix4d() {}
-
 // Assignment Operator
 Matrix4d& Matrix4d::operator=(const Matrix4d& rhs) 
 {
@@ -120,185 +113,43 @@ Matrix4d& Matrix4d::operator=(const Matrix4d& rhs)
 	return *this;
 }
 
-Vectord Matrix2d::get_col(size_t index)
-{
-	Vectord result;
-    for (size_t i=0; i<_rows; ++i)
-	{
-		result.push_back(_mat[i][index]);
-	}
-	return result;
-}
 
-void Matrix2d::set_col(const Vectord& v, size_t index)
-{
-	assert (v.size() == _rows);
-    for (size_t i=0; i<_rows; ++i)
-	{
-		_mat[i][index] = v[i];
-	}
-}
-
-void Matrix2d::set_col(const nng::Vector& v, size_t index)
-{
-	assert (v.get_length() == _rows);
-    for (size_t i=0; i<_rows; ++i)
-	{
-		_mat[i][index] = v[i];
-	}
-}
-
-// Matrix/scalar addition
-Matrix2d Matrix2d::operator+(const double& rhs) 
-{
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] + rhs;
-    }
-  }
-
-  return result;
-}
-
-// Matrix/scalar subtraction
-Matrix2d Matrix2d::operator-(const double& rhs) 
-{
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] - rhs;
-    }
-  }
-
-  return result;
-}
+Matrix4d::~Matrix4d() {}
 
 
-// Matrix/scalar multiplication
-Matrix2d Matrix2d::operator*(const double& rhs) 
-{
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] * rhs;
-    }
-  }
-
-  return result;
-}
-
-// Matrix/scalar division
-Matrix2d Matrix2d::operator/(const double& rhs) 
-{
-  assert (std::abs(rhs) > epsilon);
-
-  Matrix2d result(_rows, _cols, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result(i,j) = _mat[i][j] / rhs;
-    }
-  }
-
-  return result;
-}
-
-// Multiply a matrix with a vector
-Vectord Matrix2d::operator*(const Vectord& rhs) 
-{
-  assert (_cols == rhs.size());
-
-  Vectord result(_rows, 0.0);
-
-  for (size_t i=0; i<_rows; ++i) 
-  {
-    for (size_t j=0; j<_cols; ++j) 
-	{
-      result[i] += _mat[i][j] * rhs[j];
-    }
-  }
-
-  return result;
-}
-
-// divide each m[i][j] by v[j]
-Matrix2d Matrix2d::operator/(const nng::Vector& rhs)
-{
-	assert (_cols == rhs.get_length());
-	Matrix2d result(_rows, _cols, 0.0);
-	for (size_t i=0; i<_rows; ++i) 
-	{
-	for (size_t j=0; j<_cols; ++j) 
-	{
-	  result(i,j) = _mat[i][j] / rhs[j];
-	}
-	}
-
-	return result;
-}
-
-// Convert from matrix to vector
-Vectord Matrix2d::toVector()
-{
-    Vectord v;
-    for (size_t i = 0; i < _rows; ++i)
-    {
-        v.insert(v.end(),_mat[i].begin(), _mat[i].end());
-    }
-    return v;
-}
-
-nng::Vector Matrix2d::to_cnnvector()
-{
-    return nng::Vector(this->toVector());
-}
 
 // Access the individual elements
-double& Matrix2d::operator()(const size_t& row, const size_t& col) 
+double& Matrix4d::operator()(const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4) 
 {
-  return _mat[row][col];
+  return _mat[s1][s2](s3,s4);
 }
 
 // Access the individual elements (const)
-const double& Matrix2d::operator()(const size_t& row, const size_t& col) const 
+const double& Matrix4d::operator()(const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4)  const 
 {
-  return _mat[row][col];
+  return _mat[s1][s2](s3,s4);
 }
 
-void Matrix2d::setElement(double value, const size_t& row, const size_t& col)
-{
-    _mat[row][col] = value;
-}
 
-void Matrix2d::print()
+void Matrix4d::print()
 {
-  for (size_t i=0; i<_rows; ++i) 
+  for (size_t i=0; i<_shape[0]; ++i) 
   {
-    for (size_t j=0; j<_cols; ++j) 
+    for (size_t j=0; j<_shape[1]; ++j) 
 	{
-      std::cout << _mat[i][j] << ", ";
+		std::cout << "i="<<i << ", j="<<j<<std::endl;
+		for (size_t k=0; k<_shape[2]; ++k) 
+		{
+			for (size_t l=0; l<_shape[3]; ++l) 
+			{
+			  std::cout << _mat[i][j](k,l) << ", ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
 }
 
-Identity::Identity(size_t n):Matrix2d(n,n,0)
-{
-    for (size_t i = 0; i < n; ++i)
-    {
-        setElement(1.0, i,i);
-    }
-}

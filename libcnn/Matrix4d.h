@@ -7,11 +7,9 @@
 
 #include "nng_type.h"
 #include "Vector.h"
-#include "Matrix3d.h"
+#include "Matrix2d.h"
 
 namespace nng{
-
-	class Vector;
 	
     class Matrix4d
     {
@@ -23,6 +21,7 @@ namespace nng{
         Matrix4d(const Matrix4d& rhs);
 		Matrix4d(Matrix4d&& rhs);
 		Matrix4d& operator=(Matrix4d&& rhs);
+		Matrix4d& operator=(const Matrix4d& rhs);
         ~Matrix4d();
 		
 
@@ -31,12 +30,12 @@ namespace nng{
         const double& operator()(const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4) const;
 
 
-		std::vector<size_t> shape const {return _shape;}
+		std::vector<size_t> shape() const {return _shape;}
 		Matrix2d getMatrix2d(const size_t& index1, const size_t& index2){return _mat[index1][index2];}
 		void setMatrix2d(const nng::Matrix2d& m, const size_t& index1, const size_t& index2){_mat[index1][index2] = m;}
         //void setElement(double value, const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4);
         
-        void print();
+       void print();
 
     private:
         std::vector<size_t> _shape;
@@ -44,5 +43,5 @@ namespace nng{
 
     };
 	
-	
+}	
 #endif

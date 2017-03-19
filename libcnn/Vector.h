@@ -10,9 +10,6 @@
 
 
 namespace nng{
-
-
-    
     
 	class Matrix2d;
     class  Vector
