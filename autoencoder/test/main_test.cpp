@@ -328,11 +328,52 @@ void testPcaZca()
 	sleep(100);
 }
 
+void testMatrix4d()
+{
+	nng::Matrix4d m1(3,2,2,2);
+	m1.print();
+	
+	nng::Matrix4d m2(3,2,2,2,1.0);
+	m2.print();
+	
+	nng::Vector v(24);
+	for (int i=0;i<24;++i)
+		v[i] = i;
+		
+	nng::Matrix4d m3(3,2,2,2,v);
+	m3.print();
+	
+	nng::Vectord v2 = v.getVector();
+	nng::Matrix4d m4(3,2,2,2,v2);
+	m4.print();
+	
+	nng::Matrix4d m5(m3);
+	m5.print();
+	
+	nng::Matrix4d m6 = m5;
+	m6.print();
+	
+	std::cout<<m6(2,1,1,1)<<std::endl;
+	
+	std::vector<size_t> shape = m6.shape();
+	for(auto s:shape)
+		std::cout<<s<<std::endl;
+	
+	nng::Matrix2d m7 = m6.getMatrix2d(2,1);
+	m7.print();
+	
+	nng::Matrix2d m8 = m7+1;
+	m6.setMatrix2d(m8,2,1);
+	m6.print();
+	
+}
+
 int main(int argc, char **argv) {
   //testMatrix2d();
   //testCnnVector();
   //testStandardNormalDistrubutionGenerator();
   //testEigenValueEigenVector();
-  testPcaZca();
+  //testPcaZca();//TODO
+  testMatrix4d();
   return 0;
 }

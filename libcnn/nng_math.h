@@ -9,6 +9,7 @@
 #include "nng_type.h"
 #include "Vector.h"
 #include "Matrix2d.h"
+#include "Matrix4d.h"
 
 namespace nng
 {

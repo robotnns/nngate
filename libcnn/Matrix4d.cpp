@@ -12,10 +12,9 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4)
   _mat.resize(s1);
   for (size_t i=0; i<_mat.size(); ++i) 
   {
-    _mat[i].resize(s2);
 	for (size_t j = 0; j < s2; ++j)
 	{
-	  _mat[i][j] = Matrix2d(s3, s4);
+	  _mat[i].push_back(Matrix2d(s3, s4));
 	}
   }
   
@@ -31,10 +30,9 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const double& ini
   _mat.resize(s1);
   for (size_t i=0; i<_mat.size(); ++i) 
   {
-    _mat[i].resize(s2);
 	for (size_t j = 0; j < s2; ++j)
 	{
-	  _mat[i][j] = Matrix2d(s3, s4, initial);
+	  _mat[i].push_back(Matrix2d(s3, s4, initial));
 	}
   }
   
@@ -50,7 +48,22 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const Vectord& ve
 {
   assert (vec.size() == s1*s2*s3*s4);
   nng::Vector v(vec);
-  Matrix4d(s1, s2, s3, s4, v);
+  _mat.resize(s1);
+  Matrix2d m(s3, s4);
+  for (size_t i=0; i<_mat.size(); ++i) 
+  {
+	for (size_t j = 0; j < s2; ++j)
+	{
+	  m = Matrix2d(s3,s4,v.getSegment(i*s2*s3*s4 + j*s3*s4,s3*s4));
+	  _mat[i].push_back(m);
+	}
+  }
+
+  _shape.resize(4);
+  _shape[0] = s1;
+  _shape[1] = s2;
+  _shape[2] = s3;
+  _shape[3] = s4;
 }
 
 Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector& v)
@@ -60,11 +73,10 @@ Matrix4d::Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector
   Matrix2d m(s3, s4);
   for (size_t i=0; i<_mat.size(); ++i) 
   {
-    _mat[i].resize(s2);
 	for (size_t j = 0; j < s2; ++j)
 	{
 	  m = Matrix2d(s3,s4,v.getSegment(i*s2*s3*s4 + j*s3*s4,s3*s4));
-	  _mat[i][j] = m;
+	  _mat[i].push_back(m);
 	}
   }
 
