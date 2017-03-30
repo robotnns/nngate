@@ -1,20 +1,18 @@
 TARGET = libkernel.so
-OBJS =Vector.o Matrix2d.o
+OBJS = cudalib.o
 INCLUDE_DIR = -I. -I../dlib-master
 
-CC = g++ -g -std=c++0x $(INCLUDE_DIR)
-CXXFLAGS += -D_REENTRANT -fPIC -Wall -Werror -g -std=c++0x  $(INCLUDE_DIR)
-CFLAGS += -D_REENTRANT -fPIC -Wall -Werror -g -std=c++0x 
-LDFLAGS = 
-
+CUDACC=/usr/local/cuda-8.0/bin/nvcc 
+CFLAGS += --ptxas-options=-v --compiler-options '-fPIC' --shared
+LDFLAGS = --ptxas-options=-v --compiler-options '-fPIC' --shared
 all: $(TARGET)
 
 libkernel.so: $(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CUDACC) -o $@ $^ $(LDFLAGS)
 
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+%.o: %.cu
+	$(CUDACC) $(CFLAGS) -c -o $@ $<
 
 $(OBJS): Makefile
 

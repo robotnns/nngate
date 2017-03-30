@@ -26,6 +26,7 @@ namespace nng{
 		
 
         // Matrix/Matrix operations
+        //todo optimize
         Matrix2d& operator=(const Matrix2d& rhs);
         Matrix2d operator+(const Matrix2d& rhs);
         Matrix2d& operator+=(const Matrix2d& rhs);
@@ -62,12 +63,14 @@ namespace nng{
         Vector getDiagonal();
         
         // Matrix/scalar operations
+        //todo optimize
         Matrix2d operator+(const double& rhs);
         Matrix2d operator-(const double& rhs);
         Matrix2d operator*(const double& rhs);
         Matrix2d operator/(const double& rhs);
 
         // Matrix/vector operations
+        //todo optimize
         Vectord operator*(const Vectord& rhs);
         Matrix2d operator/(const nng::Vector& rhs);
         Vectord toVector();
