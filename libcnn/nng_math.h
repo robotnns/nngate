@@ -57,5 +57,8 @@ namespace nng
     nng::Vector operator-(double scalar, nng::Vector& v);
     nng::Vector operator*(double scalar, nng::Vector& v);
     nng::Vector operator/(double scalar, nng::Vector& v);
+	
+	nng::Matrix2d convolve2d(const nng::Matrix2d& im, const nng::Matrix2d& feature, const size_t stride = 1);
+			
 }
 #endif

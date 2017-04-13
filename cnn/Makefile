@@ -1,7 +1,7 @@
 TARGET = cnn
-OBJS = nn_main.o 
+OBJS = cnn.o 
 CC = g++ -g -std=c++0x 
-INCLUDE_DIR = -I.  -I../libcnn/
+INCLUDE_DIR = -I.  -I../libcnn/ -I../dlib-master/
 
 CXXFLAGS =  -g -std=c++0x -D_REENTRANT $(INCLUDE_DIR)
 #LDFLAGS = -lpthread /usr/lib/libmbox.so

@@ -208,3 +208,45 @@ nng::se_stack nng::params2stack(nng::param_config& param_net_config)
 
     return stack;
 }
+
+nng::Matrix2d nng::convolve2d(const nng::Matrix2d& im, const nng::Matrix2d& feature,const size_t stride)
+{
+	size_t im_width = im.get_cols();
+	size_t im_height = im.get_rows();
+	size_t feature_width = feature.get_cols();
+	size_t feature_height = feature.get_rows();
+	
+    assert((im_width - feature_width)%stride == 0);
+	assert((im_height - feature_height)%stride == 0);
+	
+	size_t output_width = (im_width - feature_width)/stride + 1;
+	size_t output_height = (im_height - feature_height)/stride + 1;
+	nng::Matrix2d result(output_width, output_height);
+	
+
+	//if ((Wx-Wf)%s != 0 || (Hx-Hf)%s != 0)
+	//{
+	//	std::cout<<"error: stride value not compatible with data and filter size"<<std::endl;
+	//	return false;
+	//}
+	
+	for (size_t i=0;i<=(im_width-feature_width);i+=stride)
+	{
+		for (size_t j=0;j<=(im_height-feature_height);j+=stride)
+		{
+			
+			result(i,j) = im.getBlock(i,j,feature_width,feature_height).dot(feature).sum();
+			//double sum = 0;
+			//for (size_t l=0;l<feature_width;l++)
+			//{
+			//	for (size_t k=0;k<feature_height;k++)
+			//	{	
+			//		sum += X[Wx*(i+l)+j+k]*F[Wf*l+k];
+			//	}
+			//}
+			//output.push_back(sum);
+		
+		}
+	}
+	return result;
+}

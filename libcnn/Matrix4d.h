@@ -14,7 +14,7 @@ namespace nng{
     class Matrix4d
     {
     public:
-		Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4);
+		Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4);//(r, c, channel, image number)
         Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const double& initial);
         Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const Vectord& vec);
         Matrix4d(size_t s1, size_t s2, size_t s3, size_t s4, const nng::Vector& v);
@@ -31,8 +31,8 @@ namespace nng{
 
 
 		std::vector<size_t> shape() const {return _shape;}
-		Matrix2d getMatrix2d(const size_t& index1, const size_t& index2){return _mat[index1][index2];}
-		void setMatrix2d(const nng::Matrix2d& m, const size_t& index1, const size_t& index2){_mat[index1][index2] = m;}
+		Matrix2d getMatrix2d(const size_t& s3, const size_t& s4){return _mat[s4][s3];}
+		void setMatrix2d(const nng::Matrix2d& m, const size_t& s3, const size_t& s4){_mat[s4][s3] = m;}
         //void setElement(double value, const size_t& s1, const size_t& s2, const size_t& s3, const size_t& s4);
         
        void print();

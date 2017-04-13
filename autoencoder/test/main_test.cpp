@@ -330,21 +330,21 @@ void testPcaZca()
 
 void testMatrix4d()
 {
-	nng::Matrix4d m1(3,2,2,2);
+	nng::Matrix4d m1(2,2,2,3);
 	m1.print();
 	
-	nng::Matrix4d m2(3,2,2,2,1.0);
+	nng::Matrix4d m2(2,2,2,3,1.0);
 	m2.print();
 	
 	nng::Vector v(24);
 	for (int i=0;i<24;++i)
 		v[i] = i;
 		
-	nng::Matrix4d m3(3,2,2,2,v);
+	nng::Matrix4d m3(2,2,2,3,v);
 	m3.print();
 	
 	nng::Vectord v2 = v.getVector();
-	nng::Matrix4d m4(3,2,2,2,v2);
+	nng::Matrix4d m4(2,2,2,3,v2);
 	m4.print();
 	
 	nng::Matrix4d m5(m3);
@@ -353,19 +353,48 @@ void testMatrix4d()
 	nng::Matrix4d m6 = m5;
 	m6.print();
 	
-	std::cout<<m6(2,1,1,1)<<std::endl;
+	std::cout<<m6(1,1,1,2)<<std::endl;
 	
 	std::vector<size_t> shape = m6.shape();
 	for(auto s:shape)
 		std::cout<<s<<std::endl;
 	
-	nng::Matrix2d m7 = m6.getMatrix2d(2,1);
+	nng::Matrix2d m7 = m6.getMatrix2d(1,2);
 	m7.print();
 	
 	nng::Matrix2d m8 = m7+1;
-	m6.setMatrix2d(m8,2,1);
+	m6.setMatrix2d(m8,1,2);
 	m6.print();
 	
+}
+
+void testConvolution()
+{
+	std::vector<double> data = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+	std::vector<double> filter = {7, 5, 16, 8};
+	std::vector<double> output;
+
+    size_t stride = 1;
+    size_t width_data = 4;
+    size_t height_data = 4;
+    size_t width_filter = 2;
+    size_t height_filter = 2;
+	
+	nng::Matrix2d im(width_data, height_data, data);
+	nng::Matrix2d feature(width_filter, height_filter, filter);
+    //stride = 1
+    std::cout<<"--------test conv 1--------"<<std::endl;
+    nng::Matrix2d result = nng::convolve2d(im,feature,stride);
+	result.print();
+
+    //correct result
+	std::cout<<"reference result"<<std::endl;
+	double o1,o2,o3,o4;
+    o1 = data[0]*filter[0]+data[1]*filter[1]+data[4]*filter[2]+data[5]*filter[3];//1*7+2*5+5*16+6*8;
+	o2 = data[1]*filter[0]+data[2]*filter[1]+data[5]*filter[2]+data[6]*filter[3];//2*7+3*5+6*16+7*8;
+	o3 = data[2]*filter[0]+data[3]*filter[1]+data[6]*filter[2]+data[7]*filter[3];//3*7+4*5+7*16+8*8;
+	o4 = data[4]*filter[0]+data[5]*filter[1]+data[8]*filter[2]+data[9]*filter[3];//5*7+6*5+9*16+10*8;
+	std::cout<<o1<<" "<<o2<<" "<<o3<<" "<<o4<<"..."<<std::endl;	
 }
 
 int main(int argc, char **argv) {
@@ -374,6 +403,7 @@ int main(int argc, char **argv) {
   //testStandardNormalDistrubutionGenerator();
   //testEigenValueEigenVector();
   //testPcaZca();//TODO
-  testMatrix4d();
+  //testMatrix4d();
+  testConvolution();
   return 0;
 }
