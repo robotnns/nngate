@@ -1,3 +1,6 @@
+mkdir data
+put .pdb files in ./data
+
 Data preprocessing:
 
 ```bash

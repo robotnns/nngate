@@ -12,7 +12,9 @@ main_stacked_autoencoder
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
-
+logs
+data
+*.dat
 
 # Folder config file
 Desktop.ini

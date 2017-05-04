@@ -71,7 +71,7 @@ end
 print(model)
 
 print(c.blue '==>' ..' loading data')
-provider = torch.load 'provider.0_4'
+provider = torch.load 'provider.dat'
 provider.trainData.data = provider.trainData.data:float()
 provider.testData.data = provider.testData.data:float()
 nb_classes = 2

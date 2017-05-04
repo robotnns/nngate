@@ -6,70 +6,31 @@ dofile './loader/torchloader.lua'
 local Provider = torch.class 'Provider'
 
 function Provider:__init(full)
-  local trsize = 10000
-  local tesize = 2000
+	dataset_1= load_pixdb('./data/0.pdb')
+	dataset_2= load_pixdb('./data/4.pdb')
 
---	dataset_E= load_pixdb('../E.pdb')
---	dataset_F= load_pixdb('../F.pdb')
-	dataset_G= load_pixdb('../0.pdb')
-	dataset_H= load_pixdb('../4.pdb')
---[[
-_ff=0
-_00=0
-local enreg = 1
-local image = dataset_G.data[enreg]
-imgSize = 128*128
-for i=1,imgSize do
-
-	if image[i]  > 0 then 
- 	_ff = _ff + 1
-	end 
-
-	if image[i] == 0 then 
- 	_00 = _00 + 1 
-
-	end
-end
-print (enreg.." 1 => " .. _ff .. " 0 => " .. _00 )
---]]
---	size_E = dataset_E.label:size()[1]
---	size_F = dataset_F.label:size()[1]
 --	size_G = dataset_G.label:size()[1]
 --	size_H = dataset_H.label:size()[1]
-    size_G = 6000
-    size_H = 6000
-    dataset_G.label:fill(1)
-    dataset_H.label:fill(2)
-	local coef = 0.8
-	
---	size_E_tr = size_E * coef
---	size_F_tr = size_F * coef
---size_E_tr = math.floor(size_E_tr)
---size_F_tr = math.floor(size_F_tr)
---	size_E_te = size_E - size_E_tr
---	size_F_te = size_F - size_F_tr
 
+    dataset_1.label:fill(1)
+    dataset_2.label:fill(2)
+	--local coef = 0.8
 	--size_G_tr = size_G * coef
 	--size_H_tr = size_H * coef
---size_G_tr = math.floor(size_G_tr)
---size_H_tr = math.floor(size_H_tr)
+    --size_G_tr = math.floor(size_G_tr)
+    --size_H_tr = math.floor(size_H_tr)
 
 	--size_G_te = size_G - size_G_tr
 	--size_H_te = size_H - size_H_tr
-    size_G_tr = 5000
-    size_H_tr = 5000
-    size_G_te = 1000
-    size_H_te = 1000
-  --trsize = size_G_tr + size_H_tr 
-  --tesize = size_G_te + size_H_te
-  
-
-  print(trsize)
-  print(size_G_tr)
-  print(size_H_tr)
-  print(tesize)
-  print(size_G_te)
-  print(size_H_te)
+    size_1_tr = 5000
+    size_2_tr = 5000
+    size_1_te = 1000
+    size_2_te = 1000
+    size_1 = size_1_tr + size_1_te
+    size_2 = size_2_tr + size_2_te
+    local trsize = size_1_tr + size_2_tr 
+    local tesize = size_1_te + size_2_te
+ 
   
   -- load dataset
   imgSize=128*128
@@ -80,12 +41,12 @@ print (enreg.." 1 => " .. _ff .. " 0 => " .. _00 )
   }
   local trainData = self.trainData
   
-print('G')
-  trainData.data[{ {1, size_G_tr} }] = dataset_G.data[{{1,size_G_tr}}]
-  trainData.labels[{ {1, size_G_tr} }] = dataset_G.label[{{1,size_G_tr}}]
-print('H')  
-  trainData.data[{ {size_G_tr+1, trsize} }] = dataset_H.data[{{1,size_H_tr}}]
-  trainData.labels[{ {size_G_tr+1, trsize} }] = dataset_H.label[{{1,size_H_tr}}]
+print('train data class 1')
+  trainData.data[{ {1, size_1_tr} }] = dataset_1.data[{{1,size_1_tr}}]
+  trainData.labels[{ {1, size_1_tr} }] = dataset_1.label[{{1,size_1_tr}}]
+print('train data class 2')  
+  trainData.data[{ {size_1_tr+1, trsize} }] = dataset_2.data[{{1,size_2_tr}}]
+  trainData.labels[{ {size_1_tr+1, trsize} }] = dataset_2.label[{{1,size_2_tr}}]
   
     self.testData = {
      data = torch.Tensor(tesize, imgSize),
@@ -94,12 +55,12 @@ print('H')
   }
   local testData = self.testData
   
-print('G')
-  testData.data[{ {1, size_G_te} }] = dataset_G.data[{{1+size_G_tr,size_G}}]
-  testData.labels[{ {1, size_G_te} }] = dataset_G.label[{{1+size_G_tr,size_G}}] 
-print('H')
-  testData.data[{ {size_G_te+1, tesize} }] = dataset_H.data[{{1+size_H_tr,size_H}}]
-  testData.labels[{ {size_G_te+1, tesize} }] = dataset_H.label[{{1+size_H_tr,size_H}}] 
+print('test data class 1')
+  testData.data[{ {1, size_1_te} }] = dataset_1.data[{{1+size_1_tr,size_1}}]
+  testData.labels[{ {1, size_1_te} }] = dataset_1.label[{{1+size_1_tr,size_1}}] 
+print('test data class 2')
+  testData.data[{ {size_1_te+1, tesize} }] = dataset_2.data[{{1+size_2_tr,size_2}}]
+  testData.labels[{ {size_1_te+1, tesize} }] = dataset_2.label[{{1+size_2_tr,size_2}}] 
 print('resize')
   -- resize dataset (if using small version)
   --trainData.data = trainData.data[{ {1,trsize} }]
@@ -109,56 +70,8 @@ print('resize')
   --testData.labels = testData.labels[{ {1,tesize} }]
 
   -- reshape data
-  --[[
-local enreg = 1
-local image = trainData.data[enreg]
-imgSize = 128*128
-_ff = 0
-_00 = 0
-for i=1,imgSize do
-
-	if image[i]  > 0 then 
- 	_ff = _ff + 1
-	end 
-
-	if image[i] == 0 then 
- 	_00 = _00 + 1 
-
-	end
-end
-print (enreg.." 1 => " .. _ff .. " 0 => " .. _00 )
-]]--
   trainData.data = trainData.data:reshape(trsize,1,128,128)
   testData.data = testData.data:reshape(tesize,1,128,128)
-  --print(trainData.data[1])
-  --print(trainData.data[6000])
-
-local enreg = 1
-
-imgSize = 128*128
-_ff = 0
-_00 = 0
-for i=1,128 do
-    for j=1,128 do
-	if testData.data[enreg][1][i][j]  > 0 then 
- 	_ff = _ff + 1
-	end 
-
-	if testData.data[enreg][1][i][j]  == 0 then 
- 	_00 = _00 + 1 
-
-	end
-    end
-end
-print (enreg.." 1 => " .. _ff .. " 0 => " .. _00 )
-
- -- trainData.data = trainData.data[{{},{},{35,98},{35,98}}]
- -- testData.data = testData.data[{{},{},{35,98},{35,98}}]
-  
- -- trainData.data = trainData.data:reshape(trsize,1,64,64)
- -- testData.data = testData.data:reshape(tesize,1,64,64)
- self.trainData = trainData
- self.testData = testData
 end
 
 function Provider:normalize()
@@ -168,7 +81,7 @@ function Provider:normalize()
   local trainData = self.trainData
   local testData = self.testData
 
-  print '<trainer> preprocessing data (color space + normalization)'
+  print '<trainer> preprocessing data (normalization)'
   collectgarbage()
 
   -- preprocess trainSet
